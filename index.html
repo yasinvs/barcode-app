@@ -3,59 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benim Barkod Tarayıcım</title>
+    <title>Akıllı Barkod Tarayıcı</title>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; background: #f0f2f5; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative; }
+        h2 { text-align: center; color: #333; margin-top: 0; }
         
         /* Kontrol Alanı */
         .controls { margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
-        select, input { padding: 10px; width: 60%; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        button { padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        button.delete { background: #dc3545; }
-        button.export { background: #28a745; width: 100%; margin-top: 10px; font-size: 1.1em; }
+        select, input { padding: 12px; width: 60%; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+        button { padding: 12px 15px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        button:active { transform: scale(0.98); }
+        button.delete { background: #dc3545; float: right; }
+        button.export { background: #28a745; width: 100%; margin-top: 15px; font-size: 1.1em; }
         
         /* Kamera Alanı */
-        #reader { width: 100%; margin-bottom: 20px; border: 1px solid #ccc; }
+        #reader { width: 100%; margin-bottom: 20px; border-radius: 8px; overflow: hidden; border: 1px solid #ccc; }
         
         /* Liste Alanı */
-        #scan-list { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; border: 1px solid #eee; }
-        #scan-list li { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        #scan-list { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; }
+        #scan-list li { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         #scan-list li:nth-child(odd) { background: #fafafa; }
-        .timestamp { font-size: 0.8em; color: #666; margin-left: 10px; }
+        .timestamp { font-size: 0.8em; color: #999; margin-left: 10px; }
+
+        /* Bildirim Kutusu (Toast) */
+        #notification {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 50px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            top: 30px;
+            transform: translateX(-50%);
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.3s, top 0.3s;
+        }
+        #notification.show { visibility: visible; opacity: 1; top: 50px; }
+        #notification.success { background-color: #28a745; } /* Yeşil */
+        #notification.error { background-color: #dc3545; }   /* Kırmızı */
     </style>
 </head>
 <body>
 
+<div id="notification">Bildirim</div>
+
 <div class="container">
-    <h2>📦 Depo Barkod Sistemi</h2>
+    <h2>📦 Depo Sayım V2</h2>
 
     <div class="controls">
         <label>Aktif Klasör:</label><br>
         <select id="folderSelect" onchange="loadScans()"></select>
-        <button onclick="deleteFolder()" class="delete" style="float:right;">Sil</button>
+        <button onclick="deleteFolder()" class="delete">Sil</button>
         <br><br>
-        <input type="text" id="newFolderInput" placeholder="Yeni Klasör Adı (Örn: Raf-1)">
+        <input type="text" id="newFolderInput" placeholder="Yeni Klasör Adı">
         <button onclick="addFolder()">+ Ekle</button>
     </div>
 
     <div id="reader"></div>
 
-    <button onclick="exportToCSV()" class="export">📂 Seçili Klasörü CSV İndir</button>
+    <button onclick="exportToCSV()" class="export">📂 CSV İndir (<span id="folderNameDisplay"></span>)</button>
 
     <h3>Son Okunanlar (<span id="count">0</span>)</h3>
     <ul id="scan-list"></ul>
 </div>
 
 <script>
-    // --- 1. Veri ve Ayarlar ---
+    // --- 1. Veri Yönetimi ---
     let folders = JSON.parse(localStorage.getItem('folders')) || ['Genel'];
-    let scans = JSON.parse(localStorage.getItem('scans')) || []; // {folder: 'Genel', code: '123', time: '...'}
+    let scans = JSON.parse(localStorage.getItem('scans')) || []; 
     let currentFolder = folders[0];
+    
+    // Spam koruması için son okunanı hafızada tutuyoruz
+    let lastScannedCode = null;
+    let scanCooldown = false;
 
-    // --- 2. Başlangıç Yüklemeleri ---
+    // --- 2. Başlatma ---
     function init() {
         const select = document.getElementById('folderSelect');
         select.innerHTML = '';
@@ -69,30 +99,59 @@
         loadScans();
     }
 
-    // --- 3. Tarayıcıyı Başlat ---
+    // --- 3. Kamera Ayarları ---
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
     
     function onScanSuccess(decodedText, decodedResult) {
-        // Aynı barkodu üst üste okumasını engellemek istersen buraya kontrol koyabiliriz.
-        // Şimdilik her okuduğunu ekliyor.
-        
-        const newScan = {
-            folder: document.getElementById('folderSelect').value,
-            code: decodedText,
-            time: new Date().toLocaleString('tr-TR')
-        };
-        
-        scans.unshift(newScan); // En başa ekle
-        localStorage.setItem('scans', JSON.stringify(scans));
-        loadScans();
-        
-        // Sesli geri bildirim (Bip sesi)
-        // alert("Okundu: " + decodedText); // İstersen açabilirsin
+        // Eğer cooldown aktifse veya aynı kodu peş peşe (milisaniyeler içinde) okuyorsa işlem yapma
+        if (scanCooldown) return;
+
+        // Cooldown'ı başlat (1.5 saniye bekleme)
+        scanCooldown = true;
+        setTimeout(() => { scanCooldown = false; }, 1500);
+
+        currentFolder = document.getElementById('folderSelect').value;
+
+        // --- DUPLICATE KONTROLÜ BURADA ---
+        // Sadece ŞU ANKİ klasörde bu barkod var mı diye bakıyoruz.
+        const exists = scans.some(s => s.folder === currentFolder && s.code === decodedText);
+
+        if (exists) {
+            showToast(`⚠️ Bu barkod zaten var: ${decodedText}`, "error");
+            // Titreşim (Mobil cihaz destekliyorsa)
+            if(navigator.vibrate) navigator.vibrate(200); 
+        } else {
+            // Yoksa Ekle
+            const newScan = {
+                folder: currentFolder,
+                code: decodedText,
+                time: new Date().toLocaleString('tr-TR')
+            };
+            
+            scans.unshift(newScan);
+            localStorage.setItem('scans', JSON.stringify(scans));
+            loadScans();
+            
+            showToast(`✅ Eklendi: ${decodedText}`, "success");
+            if(navigator.vibrate) navigator.vibrate(50);
+        }
     }
     
     html5QrcodeScanner.render(onScanSuccess);
 
-    // --- 4. Fonksiyonlar ---
+    // --- 4. Yardımcı Fonksiyonlar ---
+
+    // Ekrana Şık Bildirim Çıkarma
+    function showToast(message, type) {
+        const x = document.getElementById("notification");
+        x.className = "show " + type;
+        x.innerText = message;
+        
+        // 2 saniye sonra kaybolsun
+        setTimeout(function(){ 
+            x.className = x.className.replace("show", ""); 
+        }, 2000);
+    }
 
     function addFolder() {
         const input = document.getElementById('newFolderInput');
@@ -103,6 +162,7 @@
             currentFolder = name;
             input.value = '';
             init();
+            showToast("Klasör oluşturuldu", "success");
         } else {
             alert("Geçersiz veya mevcut klasör adı!");
         }
@@ -111,9 +171,8 @@
     function deleteFolder() {
         const select = document.getElementById('folderSelect');
         const folderToDelete = select.value;
-        if(confirm(folderToDelete + " klasörü ve içindeki tüm veriler silinecek?")) {
+        if(confirm(folderToDelete + " klasörü silinecek? Veriler kaybolur.")) {
             folders = folders.filter(f => f !== folderToDelete);
-            // O klasöre ait scanleri de temizle
             scans = scans.filter(s => s.folder !== folderToDelete);
             
             if(folders.length === 0) folders = ['Genel'];
@@ -122,15 +181,17 @@
             localStorage.setItem('folders', JSON.stringify(folders));
             localStorage.setItem('scans', JSON.stringify(scans));
             init();
+            showToast("Klasör silindi", "error");
         }
     }
 
     function loadScans() {
         currentFolder = document.getElementById('folderSelect').value;
+        document.getElementById('folderNameDisplay').innerText = currentFolder;
+
         const list = document.getElementById('scan-list');
         list.innerHTML = '';
         
-        // Sadece aktif klasöre ait verileri filtrele
         const filteredScans = scans.filter(s => s.folder === currentFolder);
         document.getElementById('count').innerText = filteredScans.length;
 
@@ -147,8 +208,9 @@
         
         if(filteredScans.length === 0) { alert("Bu klasör boş!"); return; }
 
-        let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "Barkod;Tarih;Klasör\r\n"; // Başlıklar
+        // CSV BOM ekleyerek Türkçe karakter sorununu çözelim (\uFEFF)
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+        csvContent += "Barkod;Tarih;Klasör\r\n";
 
         filteredScans.forEach(row => {
             csvContent += `${row.code};${row.time};${row.folder}\r\n`;
@@ -163,7 +225,6 @@
         document.body.removeChild(link);
     }
 
-    // Başlat
     init();
 </script>
 
