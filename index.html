@@ -2,48 +2,91 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Depo Barkod Sistemi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Depo Barkod Master</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3502/3502601.png">
-
+    
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; background: #f0f2f5; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative; }
-        h2 { text-align: center; color: #333; margin-top: 0; }
-        
-        /* Kontrol Alanı */
-        .controls { margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
-        select, input { padding: 12px; width: 60%; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #eeeeee;
+            --item-bg-odd: #fafafa;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #333333;
+            --item-bg-odd: #252525;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            padding: 15px; 
+            background: var(--bg-color); 
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s;
+            user-select: none;
+        }
+
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+        }
+
+        /* Header & Dark Mode Toggle */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h2 { margin: 0; font-size: 1.5em; }
+        .theme-toggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 20px; font-size: 1.2em; cursor: pointer; }
+
+        /* Controls */
+        .controls { margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+        select, input { 
+            padding: 12px; width: 60%; margin-bottom: 10px; 
+            background: var(--bg-color); color: var(--text-color);
+            border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; 
+        }
         
         /* Butonlar */
         button { padding: 12px 15px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
         button:active { transform: scale(0.95); }
         button.delete-folder { background: #dc3545; float: right; }
-        button.export { background: #28a745; width: 100%; margin-top: 15px; font-size: 1.1em; }
+        button.export { background: #28a745; width: 100%; margin-top: 10px; font-size: 1.1em; }
         
+        /* Yedekleme Butonları */
+        .backup-area { display: flex; gap: 10px; margin-top: 15px; }
+        button.backup { background: #6c757d; flex: 1; }
+        button.restore { background: #17a2b8; flex: 1; }
+
         .btn-item-delete {
-            background: #ffcccc; color: #cc0000; padding: 5px 10px; margin-left: 10px; border-radius: 4px; font-size: 12px; border: 1px solid #ffaaaa;
+            background: #ffcccc; color: #cc0000; padding: 5px 12px; margin-left: 10px; border-radius: 4px; font-size: 14px; border: 1px solid #ffaaaa;
         }
-        
-        /* Kamera Alanı */
-        #reader { width: 100%; margin-bottom: 20px; border-radius: 8px; overflow: hidden; border: 1px solid #ccc; }
-        
-        /* Liste Alanı */
-        #scan-list { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; }
-        #scan-list li { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        #scan-list li:nth-child(odd) { background: #fafafa; }
+
+        /* Kamera */
+        #reader { width: 100%; margin-bottom: 20px; border-radius: 8px; overflow: hidden; border: 1px solid #ccc; background: black; }
+
+        /* Liste */
+        #scan-list { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; }
+        #scan-list li { padding: 12px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        #scan-list li:nth-child(odd) { background: var(--item-bg-odd); }
         
         .item-info { display: flex; flex-direction: column; }
-        .code-text { font-weight: bold; font-size: 1.1em; color: #333; }
-        .timestamp { font-size: 0.8em; color: #999; }
+        .code-text { font-weight: bold; font-size: 1.1em; }
+        .timestamp { font-size: 0.8em; opacity: 0.7; }
 
-        /* Bildirim Kutusu (Toast) */
+        /* Bildirim (Toast) */
         #notification {
             visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 1000; left: 50%; top: 30px; transform: translateX(-50%); font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.3s, top 0.3s;
         }
@@ -57,12 +100,15 @@
 <div id="notification">Bildirim</div>
 
 <div class="container">
-    <h2>📦 Depo Sayım PWA</h2>
+    <div class="header">
+        <h2>📦 Barkod Master</h2>
+        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    </div>
 
     <div class="controls">
         <label>Aktif Klasör:</label><br>
         <select id="folderSelect" onchange="loadScans()"></select>
-        <button onclick="deleteFolder()" class="delete-folder">Klasörü Sil</button>
+        <button onclick="deleteFolder()" class="delete-folder">Sil</button>
         <br><br>
         <input type="text" id="newFolderInput" placeholder="Yeni Klasör Adı">
         <button onclick="addFolder()">+ Ekle</button>
@@ -72,26 +118,38 @@
 
     <button onclick="exportToCSV()" class="export">📂 CSV İndir (<span id="folderNameDisplay"></span>)</button>
 
+    <div class="backup-area">
+        <button onclick="backupData()" class="backup">💾 Yedekle</button>
+        <button onclick="document.getElementById('restoreInput').click()" class="restore">♻️ Geri Yükle</button>
+        <input type="file" id="restoreInput" style="display:none" onchange="restoreData(this)">
+    </div>
+
     <h3>Son Okunanlar (<span id="count">0</span>)</h3>
     <ul id="scan-list"></ul>
 </div>
 
 <script>
-    // --- PWA Service Worker Kaydı ---
+    // --- 0. SİSTEM AYARLARI ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Service Worker Kaydı
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('Service Worker Kayıtlı', reg))
-                .catch(err => console.log('SW Hatası:', err));
-        });
+        window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
     }
 
-    // --- Mevcut Uygulama Kodları ---
+    // --- 1. VERİ YÖNETİMİ ---
     let folders = JSON.parse(localStorage.getItem('folders')) || ['Genel'];
     let scans = JSON.parse(localStorage.getItem('scans')) || []; 
     let currentFolder = folders[0];
     let scanCooldown = false;
 
+    // Tema Kontrolü
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.querySelector('.theme-toggle').innerText = '☀️';
+    }
+
+    // --- 2. BAŞLATMA ---
     function init() {
         const select = document.getElementById('folderSelect');
         select.innerHTML = '';
@@ -105,6 +163,7 @@
         loadScans();
     }
 
+    // --- 3. KAMERA ve TARAMA ---
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
     
     function onScanSuccess(decodedText, decodedResult) {
@@ -116,8 +175,8 @@
         const exists = scans.some(s => s.folder === currentFolder && s.code === decodedText);
 
         if (exists) {
-            showToast(`⚠️ Bu zaten var: ${decodedText}`, "error");
-            if(navigator.vibrate) navigator.vibrate(200); 
+            showToast(`⚠️ Zaten var: ${decodedText}`, "error");
+            if(navigator.vibrate) navigator.vibrate([50, 50, 50]);
         } else {
             const newScan = {
                 folder: currentFolder,
@@ -125,28 +184,57 @@
                 time: new Date().toLocaleString('tr-TR')
             };
             scans.unshift(newScan);
-            localStorage.setItem('scans', JSON.stringify(scans));
+            saveData(); // Merkezi kayıt
             loadScans();
+            
             showToast(`✅ Eklendi: ${decodedText}`, "success");
-            if(navigator.vibrate) navigator.vibrate(50);
+            playBeep();
+            if(navigator.vibrate) navigator.vibrate(100);
         }
     }
     
     html5QrcodeScanner.render(onScanSuccess);
 
-    function deleteItem(codeToDelete) {
-        if(confirm(`"${codeToDelete}" silinsin mi?`)) {
-            scans = scans.filter(s => !(s.folder === currentFolder && s.code === codeToDelete));
-            localStorage.setItem('scans', JSON.stringify(scans));
-            loadScans();
+    // --- 4. YARDIMCI FONKSİYONLAR ---
+
+    function saveData() {
+        localStorage.setItem('scans', JSON.stringify(scans));
+        localStorage.setItem('folders', JSON.stringify(folders));
+    }
+
+    function playBeep() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = "square";
+        oscillator.frequency.value = 880;
+        gainNode.gain.value = 0.1;
+        oscillator.start();
+        setTimeout(() => { oscillator.stop(); }, 150);
+    }
+
+    function toggleTheme() {
+        if (document.body.getAttribute('data-theme') === 'dark') {
+            document.body.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+            document.querySelector('.theme-toggle').innerText = '🌙';
+        } else {
+            document.body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+            document.querySelector('.theme-toggle').innerText = '☀️';
         }
     }
 
-    function showToast(message, type) {
-        const x = document.getElementById("notification");
-        x.className = "show " + type;
-        x.innerText = message;
-        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2000);
+    // --- 5. KLASÖR VE LİSTE İŞLEMLERİ ---
+
+    function deleteItem(codeToDelete) {
+        if(confirm(`"${codeToDelete}" silinsin mi?`)) {
+            scans = scans.filter(s => !(s.folder === currentFolder && s.code === codeToDelete));
+            saveData();
+            loadScans();
+        }
     }
 
     function addFolder() {
@@ -154,7 +242,7 @@
         const name = input.value.trim();
         if (name && !folders.includes(name)) {
             folders.push(name);
-            localStorage.setItem('folders', JSON.stringify(folders));
+            saveData();
             currentFolder = name;
             input.value = '';
             init();
@@ -165,13 +253,12 @@
     function deleteFolder() {
         const select = document.getElementById('folderSelect');
         const folderToDelete = select.value;
-        if(confirm(folderToDelete + " klasörü silinecek?")) {
+        if(confirm(folderToDelete + " klasörü ve tüm verileri silinecek?")) {
             folders = folders.filter(f => f !== folderToDelete);
             scans = scans.filter(s => s.folder !== folderToDelete);
             if(folders.length === 0) folders = ['Genel'];
             currentFolder = folders[0];
-            localStorage.setItem('folders', JSON.stringify(folders));
-            localStorage.setItem('scans', JSON.stringify(scans));
+            saveData();
             init();
             showToast("Klasör silindi", "error");
         }
@@ -191,6 +278,8 @@
         });
     }
 
+    // --- 6. EXPORT / BACKUP / RESTORE ---
+
     function exportToCSV() {
         currentFolder = document.getElementById('folderSelect').value;
         const filteredScans = scans.filter(s => s.folder === currentFolder);
@@ -202,8 +291,54 @@
         link.setAttribute("href", encodedUri);
         link.setAttribute("download", `Barkodlar_${currentFolder}.csv`);
         document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        link.click(); document.body.removeChild(link);
+    }
+
+    function backupData() {
+        const data = { folders: folders, scans: scans, date: new Date().toLocaleString() };
+        const jsonStr = JSON.stringify(data);
+        const blob = new Blob([jsonStr], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "Barkod_Yedek_" + new Date().toISOString().slice(0,10) + ".json";
+        document.body.appendChild(link);
+        link.click(); document.body.removeChild(link);
+    }
+
+    function restoreData(input) {
+        const file = input.files[0];
+        if (!file) return;
+        
+        if(!confirm("DİKKAT! Mevcut tüm veriler silinecek ve yedekten geri yüklenecek. Onaylıyor musun?")) {
+            input.value = ''; return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if(data.folders && data.scans) {
+                    folders = data.folders;
+                    scans = data.scans;
+                    saveData();
+                    init();
+                    showToast("Yedek başarıyla yüklendi!", "success");
+                } else {
+                    alert("Geçersiz yedek dosyası!");
+                }
+            } catch(err) {
+                alert("Dosya okuma hatası!");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function showToast(message, type) {
+        const x = document.getElementById("notification");
+        x.className = "show " + type;
+        x.innerText = message;
+        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2000);
     }
     
     init();
