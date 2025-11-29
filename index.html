@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Barkod Master v5</title>
+    <title>Barkod Master v6</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
@@ -23,60 +23,54 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; background: var(--bg-color); color: var(--text-color); transition: 0.3s; user-select: none; }
         .container { max-width: 600px; margin: 0 auto; background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        /* Header */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         h2 { margin: 0; font-size: 1.4em; }
         .theme-toggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 20px; cursor: pointer; }
 
-        /* Controls */
         .controls { margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
         select, input[type="text"] { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; }
         
-        /* Checkbox */
         .checkbox-container { display: flex; align-items: center; margin-bottom: 10px; padding: 10px; background: var(--item-bg-odd); border-radius: 8px; border: 1px solid var(--border-color); }
         .checkbox-container input { width: 20px; height: 20px; margin-right: 10px; cursor: pointer; }
         .checkbox-container label { font-weight: bold; cursor: pointer; flex: 1; }
 
-        /* Butonlar */
         button { padding: 12px; background: var(--highlight); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 1; font-size: 14px; }
         button:active { transform: scale(0.98); }
-        button.delete-folder { background: #dc3545; flex: 0.3; } /* Klasör Sil (Kırmızı) */
-        button.clear-list { background: #ffc107; color: black; flex: 0.3; } /* Liste Temizle (Sarı) */
+        button.delete-folder { background: #dc3545; flex: 0.3; }
+        button.clear-list { background: #ffc107; color: black; flex: 0.3; }
         button.export { background: #28a745; width: 100%; margin-top: 5px; }
-        button.stats { background: #17a2b8; width: 100%; margin-top: 5px; } /* Analiz (Mavi) */
+        button.stats { background: #17a2b8; width: 100%; margin-top: 5px; }
         button.backup { background: #6c757d; }
         button.restore { background: #6610f2; }
         button.btn-manual { background: #6610f2; flex: 0.4; }
 
-        /* Kamera */
         #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; background: black; }
-
-        /* Arama */
         #searchInput { padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; margin-top: 15px; }
 
-        /* Liste */
         #scan-list { list-style: none; padding: 0; max-height: 350px; overflow-y: auto; }
         #scan-list li { padding: 12px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         
-        .item-left { display: flex; align-items: center; gap: 10px; }
+        .item-left { display: flex; align-items: center; gap: 10px; flex: 1; overflow: hidden; }
         .qty-badge { background: var(--highlight); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.9em; font-weight: bold; min-width: 25px; text-align: center; }
-        .code-text { font-weight: bold; font-size: 1.1em; display: block; }
-        .timestamp { font-size: 0.75em; opacity: 0.7; }
+        .item-info { display: flex; flex-direction: column; overflow: hidden; }
+        .code-text { font-weight: bold; font-size: 1.1em; color: var(--highlight); }
+        .name-text { font-size: 0.95em; color: var(--text-color); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .timestamp { font-size: 0.75em; opacity: 0.6; }
+        
         .btn-controls { display: flex; gap: 5px; }
         .btn-small { padding: 5px 10px; font-size: 14px; border-radius: 4px; }
+        .btn-edit { background: #6f42c1; } /* Mor: Düzenle */
         .btn-plus { background: var(--highlight); }
         .btn-minus { background: #ffc107; color: black; }
         .btn-del { background: #dc3545; }
 
-        /* Toast */
         #notification { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 1000; left: 50%; top: 30px; transform: translateX(-50%); opacity: 0; transition: 0.3s; }
         #notification.show { visibility: visible; opacity: 1; top: 50px; }
         #notification.success { background-color: #28a745; }
         #notification.update { background-color: #17a2b8; } 
         #notification.error { background-color: #dc3545; }
 
-        /* Modal (Analiz Penceresi) */
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
         .modal-content { background-color: var(--card-bg); padding: 20px; border-radius: 10px; width: 80%; max-width: 400px; text-align: center; color: var(--text-color); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .stat-box { background: var(--item-bg-odd); padding: 10px; margin: 10px 0; border-radius: 8px; }
@@ -93,23 +87,15 @@
     <div class="modal-content">
         <h3>📊 Klasör Analizi</h3>
         <h4 id="modalFolderName" style="margin:0; opacity:0.7"></h4>
-        
-        <div class="stat-box">
-            <div class="stat-value" id="statUnique">0</div>
-            <div class="stat-label">Çeşit Barkod</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-value" id="statTotal">0</div>
-            <div class="stat-label">Toplam Adet</div>
-        </div>
-        
+        <div class="stat-box"><div class="stat-value" id="statUnique">0</div><div class="stat-label">Çeşit Barkod</div></div>
+        <div class="stat-box"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Toplam Adet</div></div>
         <button class="close-modal" onclick="closeStats()">Kapat</button>
     </div>
 </div>
 
 <div class="container">
     <div class="header">
-        <h2>📦 Barkod Master <small>v5</small></h2>
+        <h2>📦 Barkod Master <small>v6</small></h2>
         <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
     </div>
 
@@ -119,12 +105,10 @@
             <button onclick="clearList()" class="clear-list" title="Listeyi Temizle">🧹</button>
             <button onclick="deleteFolder()" class="delete-folder" title="Klasörü Sil">🗑️</button>
         </div>
-        
         <div class="checkbox-container">
             <input type="checkbox" id="allowDuplicates" onchange="saveCheckboxState()">
             <label for="allowDuplicates">Yinelenenleri Ekle (Adet Modu)</label>
         </div>
-
         <div class="row">
             <input type="text" id="newFolderInput" placeholder="Yeni Klasör (Örn: Raf_A)">
             <button onclick="addFolder()">+ Klasör</button>
@@ -138,7 +122,7 @@
         <button onclick="addManualCode()" class="btn-manual">Ekle</button>
     </div>
 
-    <input type="text" id="searchInput" placeholder="🔍 Listede Ara..." onkeyup="filterList()">
+    <input type="text" id="searchInput" placeholder="🔍 Listede Ara (İsim veya Barkod)..." onkeyup="filterList()">
 
     <div class="row" style="margin-top: 15px;">
         <button onclick="showStats()" class="stats">📊 Analiz & Özet</button>
@@ -161,6 +145,9 @@
 
     let folders = JSON.parse(localStorage.getItem('folders')) || ['Genel'];
     let scans = JSON.parse(localStorage.getItem('scans')) || []; 
+    // Ürün İsimleri Veritabanı { "869...": "Süt", "123...": "Kalem" }
+    let productNames = JSON.parse(localStorage.getItem('productNames')) || {}; 
+    
     let currentFolder = folders[0];
     let scanCooldown = false;
 
@@ -187,6 +174,10 @@
         currentFolder = document.getElementById('folderSelect').value;
         const allowDuplicates = document.getElementById('allowDuplicates').checked;
         const existingIndex = scans.findIndex(s => s.folder === currentFolder && s.code === code);
+        
+        // Ürün adını bul (Varsa)
+        const name = productNames[code] || "";
+        const displayName = name ? name : code;
 
         if (existingIndex !== -1) {
             if (allowDuplicates) {
@@ -194,17 +185,17 @@
                 scans[existingIndex].time = new Date().toLocaleString('tr-TR');
                 const updatedItem = scans.splice(existingIndex, 1)[0];
                 scans.unshift(updatedItem);
-                showToast(`📦 Adet Arttı: ${code} (x${updatedItem.qty})`, "update");
+                showToast(`📦 Adet Arttı: ${displayName} (x${updatedItem.qty})`, "update");
                 playBeep(600);
             } else {
-                showToast(`⚠️ HATA: Zaten var! (${code})`, "error");
+                showToast(`⚠️ HATA: Zaten var! (${displayName})`, "error");
                 if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
                 return;
             }
         } else {
             const newScan = { folder: currentFolder, code: code, time: new Date().toLocaleString('tr-TR'), qty: 1 };
             scans.unshift(newScan);
-            showToast(`✅ Eklendi: ${code}`, "success");
+            showToast(`✅ Eklendi: ${displayName}`, "success");
             playBeep(880);
         }
         saveData(); loadScans();
@@ -221,42 +212,42 @@
     function addManualCode() {
         const input = document.getElementById('manualCodeInput');
         const code = input.value.trim();
-        if (code) { processCode(code); input.value = ''; } 
-        else { alert("Lütfen barkod yazın."); }
+        if (code) { processCode(code); input.value = ''; } else { alert("Lütfen barkod yazın."); }
     }
     function handleManualEnter(event) { if (event.key === "Enter") addManualCode(); }
 
-    // --- İSTATİSTİK FONKSİYONLARI ---
-    function showStats() {
-        currentFolder = document.getElementById('folderSelect').value;
-        const filtered = scans.filter(s => s.folder === currentFolder);
+    // --- İSİMLENDİRME FONKSİYONU ---
+    function renameItem(code) {
+        const currentName = productNames[code] || "";
+        const newName = prompt(`"${code}" barkodu için ürün adı giriniz:`, currentName);
         
-        // Hesaplamalar
-        const uniqueCount = filtered.length;
-        const totalQty = filtered.reduce((acc, curr) => acc + (curr.qty || 1), 0);
-        
-        document.getElementById('modalFolderName').innerText = currentFolder;
-        document.getElementById('statUnique').innerText = uniqueCount;
-        document.getElementById('statTotal').innerText = totalQty;
-        
-        document.getElementById('statsModal').style.display = "flex";
-    }
-    function closeStats() { document.getElementById('statsModal').style.display = "none"; }
-
-    // --- TEMİZLİK FONKSİYONLARI ---
-    function clearList() {
-        currentFolder = document.getElementById('folderSelect').value;
-        if(confirm(`"${currentFolder}" klasöründeki TÜM ÜRÜNLER temizlensin mi? (Klasör kalacak)`)) {
-            // Diğer klasörleri tut, sadece mevcut klasörün verilerini sil
-            scans = scans.filter(s => s.folder !== currentFolder);
+        if (newName !== null) { // İptal'e basmadıysa
+            productNames[code] = newName.trim();
             saveData();
-            loadScans();
-            showToast("Liste temizlendi", "update");
+            loadScans(); // Listeyi güncelle
         }
     }
 
-    // --- STANDART FONKSİYONLAR ---
+    function showStats() {
+        currentFolder = document.getElementById('folderSelect').value;
+        const filtered = scans.filter(s => s.folder === currentFolder);
+        const uniqueCount = filtered.length;
+        const totalQty = filtered.reduce((acc, curr) => acc + (curr.qty || 1), 0);
+        document.getElementById('modalFolderName').innerText = currentFolder;
+        document.getElementById('statUnique').innerText = uniqueCount;
+        document.getElementById('statTotal').innerText = totalQty;
+        document.getElementById('statsModal').style.display = "flex";
+    }
+    function closeStats() { document.getElementById('statsModal').style.display = "none"; }
+    function clearList() {
+        currentFolder = document.getElementById('folderSelect').value;
+        if(confirm(`"${currentFolder}" içi temizlensin mi?`)) {
+            scans = scans.filter(s => s.folder !== currentFolder);
+            saveData(); loadScans(); showToast("Liste temizlendi", "update");
+        }
+    }
     function saveCheckboxState() { localStorage.setItem('allowDuplicates', document.getElementById('allowDuplicates').checked); }
+    
     function updateQty(code, change) {
         const index = scans.findIndex(s => s.folder === currentFolder && s.code === code);
         if (index !== -1) {
@@ -274,35 +265,70 @@
             saveData(); loadScans();
         }
     }
+
     function loadScans() {
         currentFolder = document.getElementById('folderSelect').value;
         const list = document.getElementById('scan-list');
         list.innerHTML = '';
         const term = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = scans.filter(s => s.folder === currentFolder && s.code.toLowerCase().includes(term));
+        
+        // Arama hem kodda hem isimde yapılır
+        const filtered = scans.filter(s => {
+            const name = (productNames[s.code] || "").toLowerCase();
+            return s.folder === currentFolder && (s.code.toLowerCase().includes(term) || name.includes(term));
+        });
+
         document.getElementById('count').innerText = filtered.length;
+        
         filtered.forEach(s => {
+            const pName = productNames[s.code] || ""; // İsim varsa al
             let li = document.createElement('li');
+            
             li.innerHTML = `
-                <div class="item-left"><span class="qty-badge">x${s.qty||1}</span>
-                <div class="item-info"><span class="code-text">${s.code}</span><span class="timestamp">${s.time}</span></div></div>
-                <div class="btn-controls"><button onclick="updateQty('${s.code}',1)" class="btn-small btn-plus">+</button>
-                <button onclick="updateQty('${s.code}',-1)" class="btn-small btn-minus">-</button>
-                <button onclick="deleteItem('${s.code}')" class="btn-small btn-del">🗑️</button></div>`;
+                <div class="item-left">
+                    <span class="qty-badge">x${s.qty||1}</span>
+                    <div class="item-info">
+                        ${pName ? `<span class="name-text">${pName}</span>` : ''}
+                        <span class="code-text" style="${pName ? 'font-size:0.85em; opacity:0.8; font-weight:normal;' : ''}">${s.code}</span>
+                        <span class="timestamp">${s.time}</span>
+                    </div>
+                </div>
+                <div class="btn-controls">
+                    <button onclick="renameItem('${s.code}')" class="btn-small btn-edit">✎</button>
+                    <button onclick="updateQty('${s.code}',1)" class="btn-small btn-plus">+</button>
+                    <button onclick="updateQty('${s.code}',-1)" class="btn-small btn-minus">-</button>
+                    <button onclick="deleteItem('${s.code}')" class="btn-small btn-del">🗑️</button>
+                </div>`;
             list.appendChild(li);
         });
     }
+
     function filterList() { loadScans(); }
+
     function exportToCSV() {
         currentFolder = document.getElementById('folderSelect').value;
         const filtered = scans.filter(s => s.folder === currentFolder);
         if(filtered.length === 0) { alert("Boş!"); return; }
-        let csv = "data:text/csv;charset=utf-8,\uFEFFBarkod;Adet;Tarih;Klasör\r\n";
-        filtered.forEach(r => { csv += `${r.code};${r.qty||1};${r.time};${r.folder}\r\n`; });
+        
+        // CSV'ye Ürün Adı eklendi
+        let csv = "data:text/csv;charset=utf-8,\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n";
+        filtered.forEach(r => {
+            const name = productNames[r.code] || "";
+            // Noktalı virgül (;) CSV'yi bozmasın diye temizleyelim
+            const safeName = name.replace(/;/g, " ");
+            csv += `${r.code};${safeName};${r.qty||1};${r.time};${r.folder}\r\n`; 
+        });
+        
         const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `Stok_${currentFolder}.csv`;
         document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
-    function saveData() { localStorage.setItem('scans', JSON.stringify(scans)); localStorage.setItem('folders', JSON.stringify(folders)); }
+
+    function saveData() { 
+        localStorage.setItem('scans', JSON.stringify(scans)); 
+        localStorage.setItem('folders', JSON.stringify(folders));
+        localStorage.setItem('productNames', JSON.stringify(productNames)); // İsimleri kaydet
+    }
+    
     function addFolder() { 
         const name = document.getElementById('newFolderInput').value.trim();
         if (name && !folders.includes(name)) { folders.push(name); saveData(); currentFolder=name; document.getElementById('newFolderInput').value=''; init(); } 
@@ -315,13 +341,21 @@
         } 
     }
     function backupData() {
-        const blob = new Blob([JSON.stringify({folders, scans})], {type: "application/json"});
-        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Yedek.json"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        // İsim veritabanını da yedekle
+        const blob = new Blob([JSON.stringify({folders, scans, productNames})], {type: "application/json"});
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Full_Yedek.json"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
     function restoreData(input) {
         const file = input.files[0]; if(!file) return;
         const reader = new FileReader();
-        reader.onload = e => { try { const d=JSON.parse(e.target.result); folders=d.folders; scans=d.scans; saveData(); init(); showToast("Yüklendi!","success"); } catch(err){alert("Hata");} };
+        reader.onload = e => { 
+            try { 
+                const d=JSON.parse(e.target.result); 
+                folders=d.folders; scans=d.scans; 
+                if(d.productNames) productNames=d.productNames; // Eski yedeklerde bu olmayabilir, kontrol et
+                saveData(); init(); showToast("Yüklendi!","success"); 
+            } catch(err){alert("Hata");} 
+        };
         reader.readAsText(file);
     }
     function playBeep(freq) {
@@ -336,8 +370,6 @@
         if(document.body.getAttribute('data-theme')==='dark') { document.body.removeAttribute('data-theme'); localStorage.setItem('theme','light'); } 
         else { document.body.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
     }
-
-    // Modal dışına tıklayınca kapatma
     window.onclick = function(event) { if (event.target == document.getElementById('statsModal')) closeStats(); }
 
     init();
