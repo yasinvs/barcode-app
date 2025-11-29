@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Barkod Master v6</title>
+    <title>Barkod Master v7</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
@@ -28,7 +28,7 @@
         .theme-toggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 20px; cursor: pointer; }
 
         .controls { margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
-        select, input[type="text"] { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
+        select, input[type="text"], input[type="number"] { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; }
         
         .checkbox-container { display: flex; align-items: center; margin-bottom: 10px; padding: 10px; background: var(--item-bg-odd); border-radius: 8px; border: 1px solid var(--border-color); }
@@ -60,7 +60,7 @@
         
         .btn-controls { display: flex; gap: 5px; }
         .btn-small { padding: 5px 10px; font-size: 14px; border-radius: 4px; }
-        .btn-edit { background: #6f42c1; } /* Mor: Düzenle */
+        .btn-edit { background: #6f42c1; } 
         .btn-plus { background: var(--highlight); }
         .btn-minus { background: #ffc107; color: black; }
         .btn-del { background: #dc3545; }
@@ -95,7 +95,7 @@
 
 <div class="container">
     <div class="header">
-        <h2>📦 Barkod Master <small>v6</small></h2>
+        <h2>📦 Barkod Master <small>v7</small></h2>
         <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
     </div>
 
@@ -118,11 +118,12 @@
     <div id="reader"></div>
 
     <div class="row" style="margin-top: 10px;">
-        <input type="text" id="manualCodeInput" placeholder="Elle barkod gir..." onkeypress="handleManualEnter(event)">
+        <input type="text" id="manualCodeInput" placeholder="Barkod..." style="flex: 2;" onkeypress="handleManualEnter(event)">
+        <input type="number" id="manualQtyInput" placeholder="Adet" value="1" style="flex: 0.6; min-width: 60px;" onkeypress="handleManualEnter(event)">
         <button onclick="addManualCode()" class="btn-manual">Ekle</button>
     </div>
 
-    <input type="text" id="searchInput" placeholder="🔍 Listede Ara (İsim veya Barkod)..." onkeyup="filterList()">
+    <input type="text" id="searchInput" placeholder="🔍 Listede Ara..." onkeyup="filterList()">
 
     <div class="row" style="margin-top: 15px;">
         <button onclick="showStats()" class="stats">📊 Analiz & Özet</button>
@@ -145,9 +146,7 @@
 
     let folders = JSON.parse(localStorage.getItem('folders')) || ['Genel'];
     let scans = JSON.parse(localStorage.getItem('scans')) || []; 
-    // Ürün İsimleri Veritabanı { "869...": "Süt", "123...": "Kalem" }
     let productNames = JSON.parse(localStorage.getItem('productNames')) || {}; 
-    
     let currentFolder = folders[0];
     let scanCooldown = false;
 
@@ -169,23 +168,30 @@
 
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
     
-    function processCode(code) {
+    // GÜNCELLENMİŞ İŞLEM FONKSİYONU (ADET DESTEKLİ)
+    function processCode(code, quantityToAdd = 1) {
         if (!code) return;
         currentFolder = document.getElementById('folderSelect').value;
         const allowDuplicates = document.getElementById('allowDuplicates').checked;
         const existingIndex = scans.findIndex(s => s.folder === currentFolder && s.code === code);
         
-        // Ürün adını bul (Varsa)
         const name = productNames[code] || "";
         const displayName = name ? name : code;
 
+        // Adet 0 veya negatif gelirse 1 yap
+        quantityToAdd = parseInt(quantityToAdd);
+        if(isNaN(quantityToAdd) || quantityToAdd < 1) quantityToAdd = 1;
+
         if (existingIndex !== -1) {
             if (allowDuplicates) {
-                scans[existingIndex].qty = (scans[existingIndex].qty || 1) + 1;
+                // Mevcut adede yeni gelen adedi ekle
+                scans[existingIndex].qty = (scans[existingIndex].qty || 1) + quantityToAdd;
                 scans[existingIndex].time = new Date().toLocaleString('tr-TR');
+                
                 const updatedItem = scans.splice(existingIndex, 1)[0];
                 scans.unshift(updatedItem);
-                showToast(`📦 Adet Arttı: ${displayName} (x${updatedItem.qty})`, "update");
+                
+                showToast(`📦 Adet Arttı: ${displayName} (+${quantityToAdd})`, "update");
                 playBeep(600);
             } else {
                 showToast(`⚠️ HATA: Zaten var! (${displayName})`, "error");
@@ -193,39 +199,52 @@
                 return;
             }
         } else {
-            const newScan = { folder: currentFolder, code: code, time: new Date().toLocaleString('tr-TR'), qty: 1 };
+            // Yeni kayıt, girilen adetle başlat
+            const newScan = { 
+                folder: currentFolder, 
+                code: code, 
+                time: new Date().toLocaleString('tr-TR'), 
+                qty: quantityToAdd 
+            };
             scans.unshift(newScan);
-            showToast(`✅ Eklendi: ${displayName}`, "success");
+            showToast(`✅ Eklendi: ${displayName} (x${quantityToAdd})`, "success");
             playBeep(880);
         }
         saveData(); loadScans();
         if(navigator.vibrate && (existingIndex === -1 || allowDuplicates)) navigator.vibrate(100);
     }
 
+    // Kamera her zaman 1 adet ekler
     function onScanSuccess(decodedText) {
         if (scanCooldown) return;
         scanCooldown = true; setTimeout(() => { scanCooldown = false; }, 1200);
-        processCode(decodedText);
+        processCode(decodedText, 1);
     }
     html5QrcodeScanner.render(onScanSuccess);
 
+    // GÜNCELLENMİŞ MANUEL GİRİŞ
     function addManualCode() {
-        const input = document.getElementById('manualCodeInput');
-        const code = input.value.trim();
-        if (code) { processCode(code); input.value = ''; } else { alert("Lütfen barkod yazın."); }
+        const inputCode = document.getElementById('manualCodeInput');
+        const inputQty = document.getElementById('manualQtyInput');
+        
+        const code = inputCode.value.trim();
+        const qty = parseInt(inputQty.value) || 1; // Boşsa 1 al
+
+        if (code) { 
+            processCode(code, qty); 
+            inputCode.value = ''; 
+            inputQty.value = '1'; // Adedi tekrar 1'e çek
+            inputCode.focus(); // İmleci tekrar kod kutusuna koy (Seri giriş için)
+        } else { 
+            alert("Lütfen barkod yazın."); 
+        }
     }
     function handleManualEnter(event) { if (event.key === "Enter") addManualCode(); }
 
-    // --- İSİMLENDİRME FONKSİYONU ---
     function renameItem(code) {
         const currentName = productNames[code] || "";
-        const newName = prompt(`"${code}" barkodu için ürün adı giriniz:`, currentName);
-        
-        if (newName !== null) { // İptal'e basmadıysa
-            productNames[code] = newName.trim();
-            saveData();
-            loadScans(); // Listeyi güncelle
-        }
+        const newName = prompt(`"${code}" için isim giriniz:`, currentName);
+        if (newName !== null) { productNames[code] = newName.trim(); saveData(); loadScans(); }
     }
 
     function showStats() {
@@ -272,7 +291,6 @@
         list.innerHTML = '';
         const term = document.getElementById('searchInput').value.toLowerCase();
         
-        // Arama hem kodda hem isimde yapılır
         const filtered = scans.filter(s => {
             const name = (productNames[s.code] || "").toLowerCase();
             return s.folder === currentFolder && (s.code.toLowerCase().includes(term) || name.includes(term));
@@ -281,9 +299,8 @@
         document.getElementById('count').innerText = filtered.length;
         
         filtered.forEach(s => {
-            const pName = productNames[s.code] || ""; // İsim varsa al
+            const pName = productNames[s.code] || ""; 
             let li = document.createElement('li');
-            
             li.innerHTML = `
                 <div class="item-left">
                     <span class="qty-badge">x${s.qty||1}</span>
@@ -310,11 +327,9 @@
         const filtered = scans.filter(s => s.folder === currentFolder);
         if(filtered.length === 0) { alert("Boş!"); return; }
         
-        // CSV'ye Ürün Adı eklendi
         let csv = "data:text/csv;charset=utf-8,\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n";
         filtered.forEach(r => {
             const name = productNames[r.code] || "";
-            // Noktalı virgül (;) CSV'yi bozmasın diye temizleyelim
             const safeName = name.replace(/;/g, " ");
             csv += `${r.code};${safeName};${r.qty||1};${r.time};${r.folder}\r\n`; 
         });
@@ -326,7 +341,7 @@
     function saveData() { 
         localStorage.setItem('scans', JSON.stringify(scans)); 
         localStorage.setItem('folders', JSON.stringify(folders));
-        localStorage.setItem('productNames', JSON.stringify(productNames)); // İsimleri kaydet
+        localStorage.setItem('productNames', JSON.stringify(productNames));
     }
     
     function addFolder() { 
@@ -341,7 +356,6 @@
         } 
     }
     function backupData() {
-        // İsim veritabanını da yedekle
         const blob = new Blob([JSON.stringify({folders, scans, productNames})], {type: "application/json"});
         const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Full_Yedek.json"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
@@ -352,7 +366,7 @@
             try { 
                 const d=JSON.parse(e.target.result); 
                 folders=d.folders; scans=d.scans; 
-                if(d.productNames) productNames=d.productNames; // Eski yedeklerde bu olmayabilir, kontrol et
+                if(d.productNames) productNames=d.productNames; 
                 saveData(); init(); showToast("Yüklendi!","success"); 
             } catch(err){alert("Hata");} 
         };
