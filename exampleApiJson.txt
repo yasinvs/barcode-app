@@ -1,0 +1,6 @@
+{
+   "source": "BarkodMaster_v12",
+   "timestamp": "29.11.2025 22:30:00",
+   "filename": "Tum_Stok_Raporu.csv",
+   "csvContent": "Barkod;Urun;Adet...\n869...;Kola;10..."
+}

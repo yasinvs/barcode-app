@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Barkod Master v11 (Report)</title>
+    <title>Barkod Master v12 (Webhook)</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
@@ -21,7 +21,7 @@
         h2 { margin: 0; font-size: 1.4em; }
         .theme-toggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 20px; cursor: pointer; }
         .controls { margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
-        select, input[type="text"], input[type="number"], input[type="password"] { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
+        select, input[type="text"], input[type="number"], input[type="password"], input[type="url"] { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; }
         .checkbox-container { display: flex; align-items: center; margin-bottom: 10px; padding: 10px; background: var(--item-bg-odd); border-radius: 8px; border: 1px solid var(--border-color); }
         .checkbox-container input { width: 20px; height: 20px; margin-right: 10px; cursor: pointer; }
@@ -38,8 +38,9 @@
         
         button.gist-btn { background: #333; color: white; display: flex; align-items: center; justify-content: center; gap: 5px; }
         button.gist-settings { background: none; border: 1px solid var(--text-color); color: var(--text-color); flex: 0.2; font-size: 1.2em; padding: 0; }
-        /* Yeni Rapor Butonu */
-        button.cloud-report { background: #fd7e14; color: white; } /* Turuncu */
+        
+        /* API Butonu */
+        button.api-btn { background: #d63384; color: white; } /* Pembe */
 
         #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; background: black; }
         #searchInput { padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; margin-top: 15px; }
@@ -88,7 +89,6 @@
 <div id="gistModal" class="modal">
     <div class="modal-content">
         <h3>☁️ GitHub Gist Ayarları</h3>
-        <p style="font-size:0.9em; opacity:0.8;">Token girerseniz, ID otomatik bulunur.</p>
         <input type="password" id="gistTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxx">
         <input type="text" id="gistIdInput" placeholder="Gist ID (Otomatik)" readonly style="background: #eee; cursor: not-allowed;">
         <button class="save-modal" onclick="saveGistSettings()">Kaydet</button>
@@ -96,9 +96,19 @@
     </div>
 </div>
 
+<div id="apiModal" class="modal">
+    <div class="modal-content">
+        <h3>🔗 Özel API Ayarları</h3>
+        <p style="font-size:0.9em; opacity:0.8;">CSV Raporu bu adrese POST edilir.</p>
+        <input type="url" id="customApiUrlInput" placeholder="https://api.site.com/upload">
+        <button class="save-modal" onclick="saveApiSettings()">Kaydet</button>
+        <button class="close-modal" onclick="closeModal('apiModal')">İptal</button>
+    </div>
+</div>
+
 <div class="container">
     <div class="header">
-        <h2>📦 Barkod Master <small>v11</small></h2>
+        <h2>📦 Barkod Master <small>v12</small></h2>
         <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
     </div>
 
@@ -129,24 +139,28 @@
     <input type="text" id="searchInput" placeholder="🔍 Listede Ara..." onkeyup="filterList()">
 
     <div class="row" style="margin-top: 15px;">
-        <button onclick="showStats()" class="stats">📊 Klasör Analizi</button>
-        <button onclick="exportToCSV()" class="export">📂 Bu Klasörü İndir</button>
+        <button onclick="showStats()" class="stats">📊 Analiz & Özet</button>
+        <button onclick="exportToCSV()" class="export">📂 Excel İndir</button>
     </div>
 
     <div style="border-top: 1px solid var(--border-color); margin-top: 15px; padding-top: 10px;">
-        <p style="margin: 0 0 5px 0; font-size: 0.85em; opacity: 0.7; text-align: center;">Yedekleme & Bulut Rapor</p>
+        <p style="margin: 0 0 5px 0; font-size: 0.85em; opacity: 0.7; text-align: center;">Yedekleme & Entegrasyon</p>
+        
         <div class="row">
             <button onclick="backupData()" class="backup">💾 Yerel Yedek</button>
             <button onclick="document.getElementById('restoreInput').click()" class="restore">♻️ Yerel Yükle</button>
             <input type="file" id="restoreInput" style="display:none" onchange="restoreData(this)">
         </div>
+
         <div class="row">
             <button onclick="showGistModal()" class="gist-settings" title="Gist Ayarları">⚙️</button>
-            <button onclick="uploadToGist()" class="gist-btn">☁️ Veri Yedekle</button>
-            <button onclick="downloadFromGist()" class="gist-btn">☁️ Veri Çek</button>
+            <button onclick="uploadToGist()" class="gist-btn">☁️ Gist Yedek</button>
+            <button onclick="uploadReportToGist()" class="gist-btn" style="background:#fd7e14">☁️ Gist Rapor</button>
         </div>
+
         <div class="row">
-            <button onclick="uploadReportToGist()" class="cloud-report">☁️ Excel'i Buluta At (Tümü)</button>
+            <button onclick="showApiModal()" class="gist-settings" title="API Ayarları">⚙️</button>
+            <button onclick="uploadReportToCustomApi()" class="api-btn">📡 API'ye Raporla</button>
         </div>
     </div>
 
@@ -161,8 +175,12 @@
     let folders = JSON.parse(localStorage.getItem('folders')) || ['Genel'];
     let scans = JSON.parse(localStorage.getItem('scans')) || []; 
     let productNames = JSON.parse(localStorage.getItem('productNames')) || {}; 
+    
+    // Gist & API Ayarları
     let gistToken = localStorage.getItem('gistToken') || '';
     let gistId = localStorage.getItem('gistId') || '';
+    let customApiUrl = localStorage.getItem('customApiUrl') || '';
+
     let currentFolder = folders[0];
     let scanCooldown = false;
 
@@ -182,6 +200,7 @@
         loadScans();
         document.getElementById('gistIdInput').value = gistId;
         document.getElementById('gistTokenInput').value = gistToken;
+        document.getElementById('customApiUrlInput').value = customApiUrl;
     }
 
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
@@ -238,6 +257,51 @@
         if (newName !== null) { productNames[code] = newName.trim(); saveData(); loadScans(); }
     }
 
+    // --- API İŞLEMLERİ (YENİ) ---
+    function showApiModal() { document.getElementById('apiModal').style.display = "flex"; }
+    function saveApiSettings() {
+        customApiUrl = document.getElementById('customApiUrlInput').value.trim();
+        localStorage.setItem('customApiUrl', customApiUrl);
+        showToast("API URL Kaydedildi", "success"); closeModal('apiModal');
+    }
+
+    async function uploadReportToCustomApi() {
+        if (!customApiUrl) { alert("Önce API URL giriniz!"); showApiModal(); return; }
+
+        showToast("API'ye gönderiliyor...", "update");
+
+        // CSV İçeriği
+        let csvContent = "\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n";
+        scans.forEach(r => {
+             const name = (productNames[r.code] || "").replace(/;/g, " ");
+             csvContent += `${r.code};${name};${r.qty||1};${r.time};${r.folder}\r\n`;
+        });
+
+        // JSON Payload Hazırla
+        const payload = {
+            source: "BarkodMaster",
+            timestamp: new Date().toLocaleString(),
+            filename: "Tum_Stok_Raporu.csv",
+            csvContent: csvContent
+        };
+
+        try {
+            const response = await fetch(customApiUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                showToast("✅ API'ye İletildi!", "success");
+            } else {
+                throw new Error("Sunucu Hatası: " + response.status);
+            }
+        } catch (error) {
+            alert("Gönderim Başarısız: " + error.message + "\n(CORS ayarlarını kontrol edin)");
+        }
+    }
+
     // --- GIST İŞLEMLERİ ---
     function showGistModal() { document.getElementById('gistModal').style.display = "flex"; }
     function closeModal(id) { document.getElementById(id).style.display = "none"; }
@@ -266,7 +330,6 @@
         } catch (error) { console.error(error); return null; }
     }
 
-    // YEDEKLEME (JSON)
     async function uploadToGist() {
         if (!gistToken) { alert("Önce Token giriniz!"); showGistModal(); return; }
         if (!gistId) await findGistId();
@@ -287,50 +350,27 @@
         } catch (error) { alert("Hata: " + error.message); }
     }
 
-    // RAPORLAMA (CSV) - YENİ ÖZELLİK
     async function uploadReportToGist() {
         if (!gistToken) { alert("Önce Token giriniz!"); showGistModal(); return; }
-        if (!gistId) await findGistId(); // Yedek varsa onun içine at, yoksa yeni oluştur
-
-        showToast("Rapor oluşturuluyor...", "update");
-        
-        // CSV İçeriğini Hazırla (BÜTÜN KLASÖRLER)
+        if (!gistId) await findGistId();
+        showToast("Raporlanıyor...", "update");
         let csvContent = "\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n";
         scans.forEach(r => {
              const name = (productNames[r.code] || "").replace(/;/g, " ");
              csvContent += `${r.code};${name};${r.qty||1};${r.time};${r.folder}\r\n`;
         });
-
         try {
             let url = "https://api.github.com/gists"; let method = "POST";
             if (gistId) { url += "/" + gistId; method = "PATCH"; }
-
             const response = await fetch(url, {
                 method: method,
                 headers: { "Authorization": `token ${gistToken}`, "Accept": "application/vnd.github.v3+json", "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    description: "Barkod Master Otomatik Yedek & Rapor", 
-                    public: false, 
-                    files: { 
-                        "Tum_Stok_Raporu.csv": { content: csvContent } // İkinci dosya olarak eklenir/güncellenir
-                    } 
-                })
+                body: JSON.stringify({ description: "Barkod Master Otomatik Yedek & Rapor", public: false, files: { "Tum_Stok_Raporu.csv": { content: csvContent } } })
             });
-
             if (!response.ok) throw new Error(response.status);
             const data = await response.json();
-            
-            // Eğer yeni oluşturulduysa ID'yi al
-            if (!gistId) {
-                gistId = data.id; localStorage.setItem('gistId', gistId); document.getElementById('gistIdInput').value = gistId;
-            }
-
-            // Dosya linkini bul
-            const fileUrl = data.html_url; // Gist'in ana sayfası
-            if(confirm("✅ Excel Raporu Buluta Yüklendi!\n\nTarayıcıda açıp indirmek ister misiniz?")) {
-                window.open(fileUrl, "_blank");
-            }
-            
+            if (!gistId) { gistId = data.id; localStorage.setItem('gistId', gistId); document.getElementById('gistIdInput').value = gistId; }
+            if(confirm("Rapor Yüklendi! İndirmek ister misiniz?")) window.open(data.html_url, "_blank");
         } catch (error) { alert("Hata: " + error.message); }
     }
 
@@ -344,7 +384,7 @@
             const data = await response.json();
             if (data.files && data.files["barkod_master_backup.json"]) {
                 const content = JSON.parse(data.files["barkod_master_backup.json"].content);
-                if(confirm("Telefondaki veriler silinip bulut yedeği yüklenecek?")) {
+                if(confirm("Verileriniz bulut yedeği ile değiştirilecek?")) {
                     folders = content.folders; scans = content.scans; productNames = content.productNames || {};
                     saveData(); init(); showToast("♻️ Yüklendi!", "success");
                 }
@@ -462,7 +502,7 @@
         if(document.body.getAttribute('data-theme')==='dark') { document.body.removeAttribute('data-theme'); localStorage.setItem('theme','light'); } 
         else { document.body.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
     }
-    window.onclick = function(event) { if (event.target == document.getElementById('statsModal')) closeModal('statsModal'); if (event.target == document.getElementById('gistModal')) closeModal('gistModal'); }
+    window.onclick = function(event) { if (event.target == document.getElementById('statsModal')) closeModal('statsModal'); if (event.target == document.getElementById('gistModal')) closeModal('gistModal'); if (event.target == document.getElementById('apiModal')) closeModal('apiModal'); }
 
     init();
 </script>
