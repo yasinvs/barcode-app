@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Depo Barkod Master</title>
+    <title>Barkod Master Hibrit</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
@@ -13,85 +13,63 @@
 
     <style>
         :root {
-            --bg-color: #f0f2f5;
-            --card-bg: #ffffff;
-            --text-color: #333333;
-            --border-color: #eeeeee;
-            --item-bg-odd: #fafafa;
+            --bg-color: #f0f2f5; --card-bg: #ffffff; --text-color: #333333;
+            --border-color: #eeeeee; --item-bg-odd: #fafafa; --highlight: #007bff;
         }
-
         [data-theme="dark"] {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #e0e0e0;
-            --border-color: #333333;
-            --item-bg-odd: #252525;
+            --bg-color: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0;
+            --border-color: #333333; --item-bg-odd: #252525; --highlight: #4dabf7;
         }
-
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            padding: 15px; 
-            background: var(--bg-color); 
-            color: var(--text-color);
-            transition: background 0.3s, color 0.3s;
-            user-select: none;
-        }
-
-        .container { 
-            max-width: 600px; 
-            margin: 0 auto; 
-            background: var(--card-bg); 
-            padding: 20px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
-        }
-
-        /* Header & Dark Mode Toggle */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        h2 { margin: 0; font-size: 1.5em; }
-        .theme-toggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 20px; font-size: 1.2em; cursor: pointer; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; background: var(--bg-color); color: var(--text-color); transition: 0.3s; user-select: none; }
+        .container { max-width: 600px; margin: 0 auto; background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        h2 { margin: 0; font-size: 1.4em; }
+        .theme-toggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 20px; cursor: pointer; }
 
         /* Controls */
-        .controls { margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
-        select, input { 
-            padding: 12px; width: 60%; margin-bottom: 10px; 
-            background: var(--bg-color); color: var(--text-color);
-            border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; 
-        }
+        .controls { margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+        select, input[type="text"] { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
+        .row { display: flex; gap: 10px; }
         
-        /* Butonlar */
-        button { padding: 12px 15px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
-        button:active { transform: scale(0.95); }
-        button.delete-folder { background: #dc3545; float: right; }
-        button.export { background: #28a745; width: 100%; margin-top: 10px; font-size: 1.1em; }
-        
-        /* Yedekleme Butonları */
-        .backup-area { display: flex; gap: 10px; margin-top: 15px; }
-        button.backup { background: #6c757d; flex: 1; }
-        button.restore { background: #17a2b8; flex: 1; }
+        /* Checkbox Stili */
+        .checkbox-container { display: flex; align-items: center; margin-bottom: 10px; padding: 10px; background: var(--item-bg-odd); border-radius: 8px; border: 1px solid var(--border-color); }
+        .checkbox-container input { width: 20px; height: 20px; margin-right: 10px; cursor: pointer; }
+        .checkbox-container label { font-weight: bold; cursor: pointer; flex: 1; }
 
-        .btn-item-delete {
-            background: #ffcccc; color: #cc0000; padding: 5px 12px; margin-left: 10px; border-radius: 4px; font-size: 14px; border: 1px solid #ffaaaa;
-        }
+        button { padding: 12px; background: var(--highlight); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 1; }
+        button.delete-folder { background: #dc3545; flex: 0.4; }
+        button.export { background: #28a745; width: 100%; margin-top: 10px; }
+        button.backup { background: #6c757d; }
+        button.restore { background: #17a2b8; }
 
         /* Kamera */
-        #reader { width: 100%; margin-bottom: 20px; border-radius: 8px; overflow: hidden; border: 1px solid #ccc; background: black; }
+        #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; background: black; }
+
+        /* Arama */
+        #searchInput { padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; margin-top: 10px;}
 
         /* Liste */
-        #scan-list { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; }
+        #scan-list { list-style: none; padding: 0; max-height: 350px; overflow-y: auto; }
         #scan-list li { padding: 12px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        #scan-list li:nth-child(odd) { background: var(--item-bg-odd); }
         
-        .item-info { display: flex; flex-direction: column; }
-        .code-text { font-weight: bold; font-size: 1.1em; }
-        .timestamp { font-size: 0.8em; opacity: 0.7; }
+        .item-left { display: flex; align-items: center; gap: 10px; }
+        .qty-badge { background: var(--highlight); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.9em; font-weight: bold; min-width: 20px; text-align: center; }
+        .code-text { font-weight: bold; font-size: 1.1em; display: block; }
+        .timestamp { font-size: 0.75em; opacity: 0.7; }
 
-        /* Bildirim (Toast) */
-        #notification {
-            visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 1000; left: 50%; top: 30px; transform: translateX(-50%); font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.3s, top 0.3s;
-        }
+        .btn-controls { display: flex; gap: 5px; }
+        .btn-small { padding: 5px 10px; font-size: 14px; border-radius: 4px; }
+        .btn-plus { background: var(--highlight); }
+        .btn-minus { background: #ffc107; color: black; }
+        .btn-del { background: #dc3545; }
+
+        /* Toast */
+        #notification { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 1000; left: 50%; top: 30px; transform: translateX(-50%); opacity: 0; transition: 0.3s; }
         #notification.show { visibility: visible; opacity: 1; top: 50px; }
         #notification.success { background-color: #28a745; }
+        #notification.update { background-color: #17a2b8; } 
         #notification.error { background-color: #dc3545; }
     </style>
 </head>
@@ -101,246 +79,228 @@
 
 <div class="container">
     <div class="header">
-        <h2>📦 Barkod Master</h2>
+        <h2>📦 Barkod Master <small>v3</small></h2>
         <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
     </div>
 
     <div class="controls">
-        <label>Aktif Klasör:</label><br>
-        <select id="folderSelect" onchange="loadScans()"></select>
-        <button onclick="deleteFolder()" class="delete-folder">Sil</button>
-        <br><br>
-        <input type="text" id="newFolderInput" placeholder="Yeni Klasör Adı">
-        <button onclick="addFolder()">+ Ekle</button>
+        <div class="row">
+            <select id="folderSelect" onchange="loadScans()"></select>
+            <button onclick="deleteFolder()" class="delete-folder">🗑️</button>
+        </div>
+        
+        <div class="checkbox-container">
+            <input type="checkbox" id="allowDuplicates" onchange="saveCheckboxState()">
+            <label for="allowDuplicates">Yinelenenleri Ekle (Adet Modu)</label>
+        </div>
+
+        <div class="row">
+            <input type="text" id="newFolderInput" placeholder="Yeni Klasör (Örn: Raf_A)">
+            <button onclick="addFolder()">+ Klasör</button>
+        </div>
     </div>
 
     <div id="reader"></div>
 
-    <button onclick="exportToCSV()" class="export">📂 CSV İndir (<span id="folderNameDisplay"></span>)</button>
+    <input type="text" id="searchInput" placeholder="🔍 Barkod Ara..." onkeyup="filterList()">
 
-    <div class="backup-area">
-        <button onclick="backupData()" class="backup">💾 Yedekle</button>
+    <button onclick="exportToCSV()" class="export">📂 Excel/CSV İndir</button>
+
+    <div class="row" style="margin-top:10px">
+        <button onclick="backupData()" class="backup">💾 Yedek Al</button>
         <button onclick="document.getElementById('restoreInput').click()" class="restore">♻️ Geri Yükle</button>
         <input type="file" id="restoreInput" style="display:none" onchange="restoreData(this)">
     </div>
 
-    <h3>Son Okunanlar (<span id="count">0</span>)</h3>
+    <h3>Ürünler (<span id="count">0</span>)</h3>
     <ul id="scan-list"></ul>
 </div>
 
 <script>
-    // --- 0. SİSTEM AYARLARI ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
-    // Service Worker Kaydı
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
-    }
+    if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js')); }
 
-    // --- 1. VERİ YÖNETİMİ ---
     let folders = JSON.parse(localStorage.getItem('folders')) || ['Genel'];
     let scans = JSON.parse(localStorage.getItem('scans')) || []; 
     let currentFolder = folders[0];
     let scanCooldown = false;
 
-    // Tema Kontrolü
-    if (localStorage.getItem('theme') === 'dark') {
-        document.body.setAttribute('data-theme', 'dark');
-        document.querySelector('.theme-toggle').innerText = '☀️';
-    }
+    // Ayarları Yükle
+    if (localStorage.getItem('theme') === 'dark') { document.body.setAttribute('data-theme', 'dark'); }
+    
+    // Checkbox durumunu yükle (Varsayılan: True/Seçili)
+    const savedCheckbox = localStorage.getItem('allowDuplicates');
+    document.getElementById('allowDuplicates').checked = savedCheckbox !== 'false';
 
-    // --- 2. BAŞLATMA ---
     function init() {
         const select = document.getElementById('folderSelect');
         select.innerHTML = '';
         folders.forEach(f => {
             let opt = document.createElement('option');
-            opt.value = f;
-            opt.innerText = f;
+            opt.value = f; opt.innerText = f;
             if(f === currentFolder) opt.selected = true;
             select.appendChild(opt);
         });
         loadScans();
     }
 
-    // --- 3. KAMERA ve TARAMA ---
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
     
     function onScanSuccess(decodedText, decodedResult) {
         if (scanCooldown) return;
         scanCooldown = true;
-        setTimeout(() => { scanCooldown = false; }, 1500);
+        setTimeout(() => { scanCooldown = false; }, 1200);
 
         currentFolder = document.getElementById('folderSelect').value;
-        const exists = scans.some(s => s.folder === currentFolder && s.code === decodedText);
+        const allowDuplicates = document.getElementById('allowDuplicates').checked; // Checkbox durumu
+        
+        const existingIndex = scans.findIndex(s => s.folder === currentFolder && s.code === decodedText);
 
-        if (exists) {
-            showToast(`⚠️ Zaten var: ${decodedText}`, "error");
-            if(navigator.vibrate) navigator.vibrate([50, 50, 50]);
+        if (existingIndex !== -1) {
+            // --- ÜRÜN ZATEN VAR ---
+            if (allowDuplicates) {
+                // Mod AÇIK: Adet Artır
+                scans[existingIndex].qty = (scans[existingIndex].qty || 1) + 1;
+                scans[existingIndex].time = new Date().toLocaleString('tr-TR');
+                
+                // Başa taşı
+                const updatedItem = scans.splice(existingIndex, 1)[0];
+                scans.unshift(updatedItem);
+                
+                showToast(`📦 Adet Arttı: ${decodedText} (x${updatedItem.qty})`, "update");
+                playBeep(600);
+            } else {
+                // Mod KAPALI: Hata Ver
+                showToast(`⚠️ HATA: Bu ürün zaten var! (${decodedText})`, "error");
+                if(navigator.vibrate) navigator.vibrate([100, 50, 100]); // Hata titreşimi
+                return; // Kaydetme ve çık
+            }
         } else {
+            // --- YENİ ÜRÜN ---
             const newScan = {
                 folder: currentFolder,
                 code: decodedText,
-                time: new Date().toLocaleString('tr-TR')
+                time: new Date().toLocaleString('tr-TR'),
+                qty: 1
             };
             scans.unshift(newScan);
-            saveData(); // Merkezi kayıt
-            loadScans();
-            
-            showToast(`✅ Eklendi: ${decodedText}`, "success");
-            playBeep();
-            if(navigator.vibrate) navigator.vibrate(100);
+            showToast(`✅ Yeni Ürün: ${decodedText}`, "success");
+            playBeep(880);
         }
+        
+        saveData();
+        loadScans();
+        if(navigator.vibrate && (existingIndex === -1 || allowDuplicates)) navigator.vibrate(100);
     }
     
     html5QrcodeScanner.render(onScanSuccess);
 
-    // --- 4. YARDIMCI FONKSİYONLAR ---
-
-    function saveData() {
-        localStorage.setItem('scans', JSON.stringify(scans));
-        localStorage.setItem('folders', JSON.stringify(folders));
+    // --- Fonksiyonlar ---
+    
+    function saveCheckboxState() {
+        const isChecked = document.getElementById('allowDuplicates').checked;
+        localStorage.setItem('allowDuplicates', isChecked);
     }
 
-    function playBeep() {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        oscillator.type = "square";
-        oscillator.frequency.value = 880;
-        gainNode.gain.value = 0.1;
-        oscillator.start();
-        setTimeout(() => { oscillator.stop(); }, 150);
-    }
-
-    function toggleTheme() {
-        if (document.body.getAttribute('data-theme') === 'dark') {
-            document.body.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'light');
-            document.querySelector('.theme-toggle').innerText = '🌙';
-        } else {
-            document.body.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-            document.querySelector('.theme-toggle').innerText = '☀️';
+    function updateQty(code, change) {
+        const index = scans.findIndex(s => s.folder === currentFolder && s.code === code);
+        if (index !== -1) {
+            scans[index].qty = (scans[index].qty || 1) + change;
+            if (scans[index].qty <= 0) {
+                if(confirm("Adet 0 oldu, silinsin mi?")) { scans.splice(index, 1); } 
+                else { scans[index].qty = 1; }
+            }
+            saveData(); loadScans();
         }
     }
 
-    // --- 5. KLASÖR VE LİSTE İŞLEMLERİ ---
-
-    function deleteItem(codeToDelete) {
-        if(confirm(`"${codeToDelete}" silinsin mi?`)) {
-            scans = scans.filter(s => !(s.folder === currentFolder && s.code === codeToDelete));
-            saveData();
-            loadScans();
-        }
-    }
-
-    function addFolder() {
-        const input = document.getElementById('newFolderInput');
-        const name = input.value.trim();
-        if (name && !folders.includes(name)) {
-            folders.push(name);
-            saveData();
-            currentFolder = name;
-            input.value = '';
-            init();
-            showToast("Klasör oluşturuldu", "success");
-        } else { alert("Geçersiz isim!"); }
-    }
-
-    function deleteFolder() {
-        const select = document.getElementById('folderSelect');
-        const folderToDelete = select.value;
-        if(confirm(folderToDelete + " klasörü ve tüm verileri silinecek?")) {
-            folders = folders.filter(f => f !== folderToDelete);
-            scans = scans.filter(s => s.folder !== folderToDelete);
-            if(folders.length === 0) folders = ['Genel'];
-            currentFolder = folders[0];
-            saveData();
-            init();
-            showToast("Klasör silindi", "error");
+    function deleteItem(code) {
+        if(confirm(`"${code}" tamamen silinsin mi?`)) {
+            scans = scans.filter(s => !(s.folder === currentFolder && s.code === code));
+            saveData(); loadScans();
         }
     }
 
     function loadScans() {
         currentFolder = document.getElementById('folderSelect').value;
-        document.getElementById('folderNameDisplay').innerText = currentFolder;
         const list = document.getElementById('scan-list');
         list.innerHTML = '';
-        const filteredScans = scans.filter(s => s.folder === currentFolder);
+        
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const filteredScans = scans.filter(s => 
+            s.folder === currentFolder && 
+            s.code.toLowerCase().includes(searchTerm)
+        );
+
         document.getElementById('count').innerText = filteredScans.length;
+
         filteredScans.forEach(s => {
+            const qty = s.qty || 1;
             let li = document.createElement('li');
-            li.innerHTML = `<div class="item-info"><span class="code-text">${s.code}</span><span class="timestamp">${s.time}</span></div><button onclick="deleteItem('${s.code}')" class="btn-item-delete">X</button>`;
+            li.innerHTML = `
+                <div class="item-left">
+                    <span class="qty-badge">x${qty}</span>
+                    <div class="item-info">
+                        <span class="code-text">${s.code}</span>
+                        <span class="timestamp">${s.time}</span>
+                    </div>
+                </div>
+                <div class="btn-controls">
+                    <button onclick="updateQty('${s.code}', 1)" class="btn-small btn-plus">+</button>
+                    <button onclick="updateQty('${s.code}', -1)" class="btn-small btn-minus">-</button>
+                    <button onclick="deleteItem('${s.code}')" class="btn-small btn-del">🗑️</button>
+                </div>
+            `;
             list.appendChild(li);
         });
     }
 
-    // --- 6. EXPORT / BACKUP / RESTORE ---
+    function filterList() { loadScans(); }
 
     function exportToCSV() {
         currentFolder = document.getElementById('folderSelect').value;
         const filteredScans = scans.filter(s => s.folder === currentFolder);
-        if(filteredScans.length === 0) { alert("Bu klasör boş!"); return; }
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFFBarkod;Tarih;Klasör\r\n";
-        filteredScans.forEach(row => { csvContent += `${row.code};${row.time};${row.folder}\r\n`; });
+        if(filteredScans.length === 0) { alert("Klasör boş!"); return; }
+        
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFFBarkod;Adet;Son_Islem_Tarihi;Klasör\r\n";
+        filteredScans.forEach(row => {
+            csvContent += `${row.code};${row.qty || 1};${row.time};${row.folder}\r\n`;
+        });
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Barkodlar_${currentFolder}.csv`);
-        document.body.appendChild(link);
-        link.click(); document.body.removeChild(link);
+        link.href = encodedUri; link.download = `Stok_${currentFolder}.csv`;
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
 
+    function saveData() { localStorage.setItem('scans', JSON.stringify(scans)); localStorage.setItem('folders', JSON.stringify(folders)); }
+    function addFolder() { 
+        const name = document.getElementById('newFolderInput').value.trim();
+        if (name && !folders.includes(name)) { folders.push(name); saveData(); currentFolder=name; document.getElementById('newFolderInput').value=''; init(); } 
+    }
+    function deleteFolder() { if(confirm("Klasör silinsin mi?")) { folders = folders.filter(f=>f!==document.getElementById('folderSelect').value); scans=scans.filter(s=>s.folder!==currentFolder); if(folders.length===0) folders=['Genel']; currentFolder=folders[0]; saveData(); init(); } }
     function backupData() {
-        const data = { folders: folders, scans: scans, date: new Date().toLocaleString() };
-        const jsonStr = JSON.stringify(data);
-        const blob = new Blob([jsonStr], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "Barkod_Yedek_" + new Date().toISOString().slice(0,10) + ".json";
-        document.body.appendChild(link);
-        link.click(); document.body.removeChild(link);
+        const blob = new Blob([JSON.stringify({folders, scans})], {type: "application/json"});
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Yedek.json"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
-
     function restoreData(input) {
-        const file = input.files[0];
-        if (!file) return;
-        
-        if(!confirm("DİKKAT! Mevcut tüm veriler silinecek ve yedekten geri yüklenecek. Onaylıyor musun?")) {
-            input.value = ''; return;
-        }
-
+        const file = input.files[0]; if(!file) return;
         const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                if(data.folders && data.scans) {
-                    folders = data.folders;
-                    scans = data.scans;
-                    saveData();
-                    init();
-                    showToast("Yedek başarıyla yüklendi!", "success");
-                } else {
-                    alert("Geçersiz yedek dosyası!");
-                }
-            } catch(err) {
-                alert("Dosya okuma hatası!");
-            }
-        };
+        reader.onload = e => { try { const d=JSON.parse(e.target.result); folders=d.folders; scans=d.scans; saveData(); init(); showToast("Yüklendi!","success"); } catch(err){alert("Hata");} };
         reader.readAsText(file);
     }
-
-    function showToast(message, type) {
-        const x = document.getElementById("notification");
-        x.className = "show " + type;
-        x.innerText = message;
-        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2000);
+    function playBeep(freq) {
+        if(audioCtx.state==='suspended') audioCtx.resume();
+        const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        o.type="square"; o.frequency.value=freq; g.gain.value=0.1;
+        o.start(); setTimeout(()=>o.stop(), 150);
     }
-    
+    function showToast(msg, type) { const x=document.getElementById("notification"); x.className="show "+type; x.innerText=msg; setTimeout(()=>x.className="", 2000); }
+    function toggleTheme() {
+        if(document.body.getAttribute('data-theme')==='dark') { document.body.removeAttribute('data-theme'); localStorage.setItem('theme','light'); } 
+        else { document.body.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
+    }
+
     init();
 </script>
 </body>
