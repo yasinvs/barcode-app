@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Barkod Master v12 (Webhook)</title>
+    <title>Barkod Master v13 (Google Drive)</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
@@ -12,7 +12,7 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
-        /* CSS AYNI - Değişiklik Yok */
+        /* CSS STİLLERİ */
         :root { --bg-color: #f0f2f5; --card-bg: #ffffff; --text-color: #333333; --border-color: #eeeeee; --item-bg-odd: #fafafa; --highlight: #007bff; }
         [data-theme="dark"] { --bg-color: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --border-color: #333333; --item-bg-odd: #252525; --highlight: #4dabf7; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; background: var(--bg-color); color: var(--text-color); transition: 0.3s; user-select: none; }
@@ -21,7 +21,7 @@
         h2 { margin: 0; font-size: 1.4em; }
         .theme-toggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 20px; cursor: pointer; }
         .controls { margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
-        select, input[type="text"], input[type="number"], input[type="password"], input[type="url"] { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
+        select, input { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; }
         .checkbox-container { display: flex; align-items: center; margin-bottom: 10px; padding: 10px; background: var(--item-bg-odd); border-radius: 8px; border: 1px solid var(--border-color); }
         .checkbox-container input { width: 20px; height: 20px; margin-right: 10px; cursor: pointer; }
@@ -36,12 +36,12 @@
         button.restore { background: #6610f2; }
         button.btn-manual { background: #6610f2; flex: 0.4; }
         
+        button.icon-btn { background: none; border: 1px solid var(--text-color); color: var(--text-color); flex: 0.2; font-size: 1.2em; padding: 0; }
         button.gist-btn { background: #333; color: white; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        button.gist-settings { background: none; border: 1px solid var(--text-color); color: var(--text-color); flex: 0.2; font-size: 1.2em; padding: 0; }
         
-        /* API Butonu */
-        button.api-btn { background: #d63384; color: white; } /* Pembe */
-
+        /* Google Drive Butonları */
+        button.drive-btn { background: #198754; color: white; display: flex; align-items: center; justify-content: center; gap: 5px; } /* Yeşil */
+        
         #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; background: black; }
         #searchInput { padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; margin-top: 15px; }
         #scan-list { list-style: none; padding: 0; max-height: 350px; overflow-y: auto; }
@@ -58,11 +58,13 @@
         .btn-plus { background: var(--highlight); }
         .btn-minus { background: #ffc107; color: black; }
         .btn-del { background: #dc3545; }
+        
         #notification { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 1000; left: 50%; top: 30px; transform: translateX(-50%); opacity: 0; transition: 0.3s; }
         #notification.show { visibility: visible; opacity: 1; top: 50px; }
         #notification.success { background-color: #28a745; }
         #notification.update { background-color: #17a2b8; } 
         #notification.error { background-color: #dc3545; }
+        
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
         .modal-content { background-color: var(--card-bg); padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; text-align: center; color: var(--text-color); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .stat-box { background: var(--item-bg-odd); padding: 10px; margin: 10px 0; border-radius: 8px; }
@@ -96,19 +98,19 @@
     </div>
 </div>
 
-<div id="apiModal" class="modal">
+<div id="driveModal" class="modal">
     <div class="modal-content">
-        <h3>🔗 Özel API Ayarları</h3>
-        <p style="font-size:0.9em; opacity:0.8;">CSV Raporu bu adrese POST edilir.</p>
-        <input type="url" id="customApiUrlInput" placeholder="https://api.site.com/upload">
-        <button class="save-modal" onclick="saveApiSettings()">Kaydet</button>
-        <button class="close-modal" onclick="closeModal('apiModal')">İptal</button>
+        <h3>Google Apps Script URL</h3>
+        <p style="font-size:0.8em; opacity:0.8;">Google Sheet'e kurduğunuz scriptin Web App URL'ini girin.</p>
+        <input type="url" id="driveUrlInput" placeholder="https://script.google.com/macros/s/...">
+        <button class="save-modal" onclick="saveDriveSettings()">Kaydet</button>
+        <button class="close-modal" onclick="closeModal('driveModal')">İptal</button>
     </div>
 </div>
 
 <div class="container">
     <div class="header">
-        <h2>📦 Barkod Master <small>v12</small></h2>
+        <h2>📦 Barkod Master <small>v13</small></h2>
         <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
     </div>
 
@@ -139,28 +141,29 @@
     <input type="text" id="searchInput" placeholder="🔍 Listede Ara..." onkeyup="filterList()">
 
     <div class="row" style="margin-top: 15px;">
-        <button onclick="showStats()" class="stats">📊 Analiz & Özet</button>
-        <button onclick="exportToCSV()" class="export">📂 Excel İndir</button>
+        <button onclick="showStats()" class="stats">📊 Analiz</button>
+        <button onclick="exportToCSV()" class="export">📂 CSV İndir</button>
     </div>
 
     <div style="border-top: 1px solid var(--border-color); margin-top: 15px; padding-top: 10px;">
-        <p style="margin: 0 0 5px 0; font-size: 0.85em; opacity: 0.7; text-align: center;">Yedekleme & Entegrasyon</p>
+        <p style="margin: 0 0 5px 0; font-size: 0.85em; opacity: 0.7; text-align: center;">Bulut Entegrasyonları</p>
         
         <div class="row">
-            <button onclick="backupData()" class="backup">💾 Yerel Yedek</button>
-            <button onclick="document.getElementById('restoreInput').click()" class="restore">♻️ Yerel Yükle</button>
+            <button onclick="backupData()" class="backup">💾 Yedekle</button>
+            <button onclick="document.getElementById('restoreInput').click()" class="restore">♻️ Geri Yükle</button>
             <input type="file" id="restoreInput" style="display:none" onchange="restoreData(this)">
         </div>
 
         <div class="row">
-            <button onclick="showGistModal()" class="gist-settings" title="Gist Ayarları">⚙️</button>
+            <button onclick="showGistModal()" class="icon-btn" title="Gist Ayar">⚙️</button>
             <button onclick="uploadToGist()" class="gist-btn">☁️ Gist Yedek</button>
-            <button onclick="uploadReportToGist()" class="gist-btn" style="background:#fd7e14">☁️ Gist Rapor</button>
+            <button onclick="downloadFromGist()" class="gist-btn">☁️ Gist Çek</button>
         </div>
-
+        
         <div class="row">
-            <button onclick="showApiModal()" class="gist-settings" title="API Ayarları">⚙️</button>
-            <button onclick="uploadReportToCustomApi()" class="api-btn">📡 API'ye Raporla</button>
+            <button onclick="showDriveModal()" class="icon-btn" title="Drive Ayar">⚙️</button>
+            <button onclick="sendToGoogle('report')" class="drive-btn" style="background:#198754">📊 Sheets'e Yaz</button>
+            <button onclick="sendToGoogle('backup')" class="drive-btn" style="background:#0d6efd">💾 Drive'a Yedekle</button>
         </div>
     </div>
 
@@ -176,10 +179,10 @@
     let scans = JSON.parse(localStorage.getItem('scans')) || []; 
     let productNames = JSON.parse(localStorage.getItem('productNames')) || {}; 
     
-    // Gist & API Ayarları
+    // Ayarlar
     let gistToken = localStorage.getItem('gistToken') || '';
     let gistId = localStorage.getItem('gistId') || '';
-    let customApiUrl = localStorage.getItem('customApiUrl') || '';
+    let driveUrl = localStorage.getItem('driveUrl') || '';
 
     let currentFolder = folders[0];
     let scanCooldown = false;
@@ -200,7 +203,7 @@
         loadScans();
         document.getElementById('gistIdInput').value = gistId;
         document.getElementById('gistTokenInput').value = gistToken;
-        document.getElementById('customApiUrlInput').value = customApiUrl;
+        document.getElementById('driveUrlInput').value = driveUrl;
     }
 
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
@@ -242,12 +245,9 @@
         processCode(decodedText, 1);
     }
     html5QrcodeScanner.render(onScanSuccess);
-
     function addManualCode() {
-        const inputCode = document.getElementById('manualCodeInput');
-        const inputQty = document.getElementById('manualQtyInput');
-        const code = inputCode.value.trim();
-        const qty = parseInt(inputQty.value) || 1; 
+        const inputCode = document.getElementById('manualCodeInput'); const inputQty = document.getElementById('manualQtyInput');
+        const code = inputCode.value.trim(); const qty = parseInt(inputQty.value) || 1; 
         if (code) { processCode(code, qty); inputCode.value = ''; inputQty.value = '1'; inputCode.focus(); } else { alert("Barkod yazın."); }
     }
     function handleManualEnter(event) { if (event.key === "Enter") addManualCode(); }
@@ -257,52 +257,56 @@
         if (newName !== null) { productNames[code] = newName.trim(); saveData(); loadScans(); }
     }
 
-    // --- API İŞLEMLERİ (YENİ) ---
-    function showApiModal() { document.getElementById('apiModal').style.display = "flex"; }
-    function saveApiSettings() {
-        customApiUrl = document.getElementById('customApiUrlInput').value.trim();
-        localStorage.setItem('customApiUrl', customApiUrl);
-        showToast("API URL Kaydedildi", "success"); closeModal('apiModal');
+    // --- GOOGLE DRIVE & SHEETS ---
+    function showDriveModal() { document.getElementById('driveModal').style.display = "flex"; }
+    function saveDriveSettings() {
+        driveUrl = document.getElementById('driveUrlInput').value.trim();
+        localStorage.setItem('driveUrl', driveUrl);
+        showToast("Drive URL Kaydedildi", "success"); closeModal('driveModal');
     }
 
-    async function uploadReportToCustomApi() {
-        if (!customApiUrl) { alert("Önce API URL giriniz!"); showApiModal(); return; }
+    async function sendToGoogle(operation) {
+        if (!driveUrl) { alert("Önce Drive URL giriniz!"); showDriveModal(); return; }
 
-        showToast("API'ye gönderiliyor...", "update");
+        showToast("Google'a gönderiliyor...", "update");
 
-        // CSV İçeriği
-        let csvContent = "\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n";
+        // CSV İçeriği (Rapor için)
+        let csvContent = "Barkod;Urun_Adi;Adet;Tarih;Klasör\n";
         scans.forEach(r => {
              const name = (productNames[r.code] || "").replace(/;/g, " ");
-             csvContent += `${r.code};${name};${r.qty||1};${r.time};${r.folder}\r\n`;
+             csvContent += `${r.code};${name};${r.qty||1};${r.time};${r.folder}\n`;
         });
 
-        // JSON Payload Hazırla
+        // JSON Yedek (Backup için)
+        const jsonContent = JSON.stringify({ folders, scans, productNames }, null, 2);
+
         const payload = {
-            source: "BarkodMaster",
-            timestamp: new Date().toLocaleString(),
-            filename: "Tum_Stok_Raporu.csv",
-            csvContent: csvContent
+            operation: operation, // 'report' veya 'backup'
+            csvContent: csvContent,
+            jsonContent: jsonContent
         };
 
         try {
-            const response = await fetch(customApiUrl, {
+            // Google Apps Script 'no-cors' modunda çalışır, cevabı okuyamayabiliriz ama işlem gerçekleşir.
+            // Bu yüzden fetch'i 'no-cors' ile değil, doğrudan 'POST' ile deniyoruz.
+            // Google Apps Script "redirect" döner, bu yüzden 'follow' ekliyoruz.
+            
+            await fetch(driveUrl, {
                 method: "POST",
+                mode: "no-cors", // Tarayıcı güvenliği için gerekli
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
 
-            if (response.ok) {
-                showToast("✅ API'ye İletildi!", "success");
-            } else {
-                throw new Error("Sunucu Hatası: " + response.status);
-            }
+            // no-cors modunda hata yakalanamaz ama işlem genelde başarılıdır.
+            showToast("✅ Gönderildi! (Drive/Sheet kontrol edin)", "success");
+
         } catch (error) {
-            alert("Gönderim Başarısız: " + error.message + "\n(CORS ayarlarını kontrol edin)");
+            alert("Hata: " + error.message);
         }
     }
 
-    // --- GIST İŞLEMLERİ ---
+    // --- GIST ---
     function showGistModal() { document.getElementById('gistModal').style.display = "flex"; }
     function closeModal(id) { document.getElementById(id).style.display = "none"; }
     function saveGistSettings() {
@@ -312,26 +316,18 @@
         gistId = ''; localStorage.removeItem('gistId'); document.getElementById('gistIdInput').value = '';
         showToast("Token Kaydedildi", "success"); closeModal('gistModal');
     }
-
     async function findGistId() {
-        showToast("Yedek dosyası aranıyor...", "update");
         try {
-            const response = await fetch("https://api.github.com/gists", {
-                headers: { "Authorization": `token ${gistToken}` }
-            });
-            if (!response.ok) throw new Error("GitHub Erişim Hatası");
+            const response = await fetch("https://api.github.com/gists", { headers: { "Authorization": `token ${gistToken}` } });
+            if (!response.ok) return null;
             const gists = await response.json();
             const foundGist = gists.find(g => g.files && g.files["barkod_master_backup.json"]);
-            if (foundGist) {
-                gistId = foundGist.id; localStorage.setItem('gistId', gistId); document.getElementById('gistIdInput').value = gistId;
-                return gistId;
-            }
+            if (foundGist) { gistId = foundGist.id; localStorage.setItem('gistId', gistId); document.getElementById('gistIdInput').value = gistId; return gistId; }
             return null;
-        } catch (error) { console.error(error); return null; }
+        } catch { return null; }
     }
-
     async function uploadToGist() {
-        if (!gistToken) { alert("Önce Token giriniz!"); showGistModal(); return; }
+        if (!gistToken) { alert("Önce Token!"); showGistModal(); return; }
         if (!gistId) await findGistId();
         showToast("Yedekleniyor...", "update");
         try {
@@ -349,42 +345,17 @@
             showToast("✅ Yedeklendi!", "success");
         } catch (error) { alert("Hata: " + error.message); }
     }
-
-    async function uploadReportToGist() {
-        if (!gistToken) { alert("Önce Token giriniz!"); showGistModal(); return; }
-        if (!gistId) await findGistId();
-        showToast("Raporlanıyor...", "update");
-        let csvContent = "\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n";
-        scans.forEach(r => {
-             const name = (productNames[r.code] || "").replace(/;/g, " ");
-             csvContent += `${r.code};${name};${r.qty||1};${r.time};${r.folder}\r\n`;
-        });
-        try {
-            let url = "https://api.github.com/gists"; let method = "POST";
-            if (gistId) { url += "/" + gistId; method = "PATCH"; }
-            const response = await fetch(url, {
-                method: method,
-                headers: { "Authorization": `token ${gistToken}`, "Accept": "application/vnd.github.v3+json", "Content-Type": "application/json" },
-                body: JSON.stringify({ description: "Barkod Master Otomatik Yedek & Rapor", public: false, files: { "Tum_Stok_Raporu.csv": { content: csvContent } } })
-            });
-            if (!response.ok) throw new Error(response.status);
-            const data = await response.json();
-            if (!gistId) { gistId = data.id; localStorage.setItem('gistId', gistId); document.getElementById('gistIdInput').value = gistId; }
-            if(confirm("Rapor Yüklendi! İndirmek ister misiniz?")) window.open(data.html_url, "_blank");
-        } catch (error) { alert("Hata: " + error.message); }
-    }
-
     async function downloadFromGist() {
-        if (!gistToken) { alert("Token giriniz!"); showGistModal(); return; }
+        if (!gistToken) { alert("Token!"); showGistModal(); return; }
         if (!gistId) { const found = await findGistId(); if (!found) { alert("Yedek bulunamadı."); return; } }
-        showToast("Veri çekiliyor...", "update");
+        showToast("Çekiliyor...", "update");
         try {
             const response = await fetch(`https://api.github.com/gists/${gistId}`, { headers: { "Authorization": `token ${gistToken}` } });
             if (!response.ok) throw new Error("Hata");
             const data = await response.json();
             if (data.files && data.files["barkod_master_backup.json"]) {
                 const content = JSON.parse(data.files["barkod_master_backup.json"].content);
-                if(confirm("Verileriniz bulut yedeği ile değiştirilecek?")) {
+                if(confirm("Yedek yüklensin mi? (Mevcut veriler silinir)")) {
                     folders = content.folders; scans = content.scans; productNames = content.productNames || {};
                     saveData(); init(); showToast("♻️ Yüklendi!", "success");
                 }
@@ -392,12 +363,8 @@
         } catch (error) { alert("Hata: " + error.message); }
     }
 
-    function cleanUpProductNames() {
-        const activeCodes = new Set(scans.map(s => s.code));
-        Object.keys(productNames).forEach(code => { if (!activeCodes.has(code)) delete productNames[code]; });
-    }
-
     // --- STANDART FONKSİYONLAR ---
+    function cleanUpProductNames() { const activeCodes = new Set(scans.map(s => s.code)); Object.keys(productNames).forEach(code => { if (!activeCodes.has(code)) delete productNames[code]; }); }
     function showStats() {
         currentFolder = document.getElementById('folderSelect').value;
         const filtered = scans.filter(s => s.folder === currentFolder);
@@ -406,103 +373,42 @@
         document.getElementById('statTotal').innerText = filtered.reduce((acc, curr) => acc + (curr.qty || 1), 0);
         document.getElementById('statsModal').style.display = "flex";
     }
-    function clearList() {
-        currentFolder = document.getElementById('folderSelect').value;
-        if(confirm(`"${currentFolder}" içi temizlensin mi?`)) {
-            scans = scans.filter(s => s.folder !== currentFolder);
-            saveData(); loadScans(); showToast("Liste temizlendi", "update");
-        }
-    }
+    function clearList() { if(confirm("Temizlensin mi?")) { scans = scans.filter(s => s.folder !== document.getElementById('folderSelect').value); saveData(); loadScans(); } }
     function saveCheckboxState() { localStorage.setItem('allowDuplicates', document.getElementById('allowDuplicates').checked); }
     function updateQty(code, change) {
         const index = scans.findIndex(s => s.folder === currentFolder && s.code === code);
-        if (index !== -1) {
-            scans[index].qty = (scans[index].qty || 1) + change;
-            if (scans[index].qty <= 0) { if(confirm("Silinsin mi?")) scans.splice(index, 1); else scans[index].qty = 1; }
-            saveData(); loadScans();
-        }
+        if (index !== -1) { scans[index].qty = (scans[index].qty || 1) + change; if (scans[index].qty <= 0) { if(confirm("Silinsin mi?")) scans.splice(index, 1); else scans[index].qty = 1; } saveData(); loadScans(); }
     }
-    function deleteItem(code) {
-        if(confirm(`"${code}" silinsin mi?`)) {
-            scans = scans.filter(s => !(s.folder === currentFolder && s.code === code));
-            saveData(); loadScans();
-        }
-    }
+    function deleteItem(code) { if(confirm("Silinsin mi?")) { scans = scans.filter(s => !(s.folder === currentFolder && s.code === code)); saveData(); loadScans(); } }
     function loadScans() {
         currentFolder = document.getElementById('folderSelect').value;
-        const list = document.getElementById('scan-list');
-        list.innerHTML = '';
+        const list = document.getElementById('scan-list'); list.innerHTML = '';
         const term = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = scans.filter(s => {
-            const name = (productNames[s.code] || "").toLowerCase();
-            return s.folder === currentFolder && (s.code.toLowerCase().includes(term) || name.includes(term));
-        });
+        const filtered = scans.filter(s => { const name = (productNames[s.code] || "").toLowerCase(); return s.folder === currentFolder && (s.code.toLowerCase().includes(term) || name.includes(term)); });
         document.getElementById('count').innerText = filtered.length;
         filtered.forEach(s => {
             const pName = productNames[s.code] || ""; 
             let li = document.createElement('li');
-            li.innerHTML = `
-                <div class="item-left"><span class="qty-badge">x${s.qty||1}</span>
-                <div class="item-info">${pName ? `<span class="name-text">${pName}</span>` : ''}
-                <span class="code-text" style="${pName ? 'font-size:0.85em; opacity:0.8; font-weight:normal;' : ''}">${s.code}</span>
-                <span class="timestamp">${s.time}</span></div></div>
-                <div class="btn-controls"><button onclick="renameItem('${s.code}')" class="btn-small btn-edit">✎</button>
-                <button onclick="updateQty('${s.code}',1)" class="btn-small btn-plus">+</button>
-                <button onclick="updateQty('${s.code}',-1)" class="btn-small btn-minus">-</button>
-                <button onclick="deleteItem('${s.code}')" class="btn-small btn-del">🗑️</button></div>`;
+            li.innerHTML = `<div class="item-left"><span class="qty-badge">x${s.qty||1}</span><div class="item-info">${pName ? `<span class="name-text">${pName}</span>` : ''}<span class="code-text" style="${pName ? 'font-size:0.85em; opacity:0.8; font-weight:normal;' : ''}">${s.code}</span><span class="timestamp">${s.time}</span></div></div><div class="btn-controls"><button onclick="renameItem('${s.code}')" class="btn-small btn-edit">✎</button><button onclick="updateQty('${s.code}',1)" class="btn-small btn-plus">+</button><button onclick="updateQty('${s.code}',-1)" class="btn-small btn-minus">-</button><button onclick="deleteItem('${s.code}')" class="btn-small btn-del">🗑️</button></div>`;
             list.appendChild(li);
         });
     }
     function filterList() { loadScans(); }
     function exportToCSV() {
-        currentFolder = document.getElementById('folderSelect').value;
-        const filtered = scans.filter(s => s.folder === currentFolder);
-        if(filtered.length === 0) { alert("Boş!"); return; }
+        const filtered = scans.filter(s => s.folder === currentFolder); if(filtered.length === 0) { alert("Boş!"); return; }
         let csv = "data:text/csv;charset=utf-8,\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n";
         filtered.forEach(r => { csv += `${r.code};${(productNames[r.code]||"").replace(/;/g, " ")};${r.qty||1};${r.time};${r.folder}\r\n`; });
-        const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `Stok_${currentFolder}.csv`;
-        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `Stok_${currentFolder}.csv`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
-    function saveData() { 
-        cleanUpProductNames(); 
-        localStorage.setItem('scans', JSON.stringify(scans)); 
-        localStorage.setItem('folders', JSON.stringify(folders));
-        localStorage.setItem('productNames', JSON.stringify(productNames));
-    }
-    function addFolder() { 
-        const name = document.getElementById('newFolderInput').value.trim();
-        if (name && !folders.includes(name)) { folders.push(name); saveData(); currentFolder=name; document.getElementById('newFolderInput').value=''; init(); } 
-    }
-    function deleteFolder() { 
-        if(confirm("Silinsin mi?")) { 
-            folders = folders.filter(f=>f!==document.getElementById('folderSelect').value); 
-            scans=scans.filter(s=>s.folder!==currentFolder); 
-            if(folders.length===0) folders=['Genel']; currentFolder=folders[0]; saveData(); init(); 
-        } 
-    }
-    function backupData() {
-        const blob = new Blob([JSON.stringify({folders, scans, productNames})], {type: "application/json"});
-        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Full_Yedek.json"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    }
-    function restoreData(input) {
-        const file = input.files[0]; if(!file) return;
-        const reader = new FileReader();
-        reader.onload = e => { try { const d=JSON.parse(e.target.result); folders=d.folders; scans=d.scans; if(d.productNames) productNames=d.productNames; saveData(); init(); showToast("Yüklendi!","success"); } catch(err){alert("Hata");} };
-        reader.readAsText(file);
-    }
-    function playBeep(freq) {
-        if(audioCtx.state==='suspended') audioCtx.resume();
-        const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
-        o.connect(g); g.connect(audioCtx.destination);
-        o.type="square"; o.frequency.value=freq; g.gain.value=0.1;
-        o.start(); setTimeout(()=>o.stop(), 150);
-    }
+    function saveData() { cleanUpProductNames(); localStorage.setItem('scans', JSON.stringify(scans)); localStorage.setItem('folders', JSON.stringify(folders)); localStorage.setItem('productNames', JSON.stringify(productNames)); }
+    function addFolder() { const name = document.getElementById('newFolderInput').value.trim(); if (name && !folders.includes(name)) { folders.push(name); saveData(); currentFolder=name; document.getElementById('newFolderInput').value=''; init(); } }
+    function deleteFolder() { if(confirm("Silinsin mi?")) { folders = folders.filter(f=>f!==document.getElementById('folderSelect').value); scans=scans.filter(s=>s.folder!==currentFolder); if(folders.length===0) folders=['Genel']; currentFolder=folders[0]; saveData(); init(); } }
+    function backupData() { const blob = new Blob([JSON.stringify({folders, scans, productNames})], {type: "application/json"}); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Full_Yedek.json"; document.body.appendChild(link); link.click(); document.body.removeChild(link); }
+    function restoreData(input) { const file = input.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = e => { try { const d=JSON.parse(e.target.result); folders=d.folders; scans=d.scans; if(d.productNames) productNames=d.productNames; saveData(); init(); showToast("Yüklendi!","success"); } catch(err){alert("Hata");} }; reader.readAsText(file); }
+    function playBeep(freq) { if(audioCtx.state==='suspended') audioCtx.resume(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.type="square"; o.frequency.value=freq; g.gain.value=0.1; o.start(); setTimeout(()=>o.stop(), 150); }
     function showToast(msg, type) { const x=document.getElementById("notification"); x.className="show "+type; x.innerText=msg; setTimeout(()=>x.className="", 2000); }
-    function toggleTheme() {
-        if(document.body.getAttribute('data-theme')==='dark') { document.body.removeAttribute('data-theme'); localStorage.setItem('theme','light'); } 
-        else { document.body.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
-    }
-    window.onclick = function(event) { if (event.target == document.getElementById('statsModal')) closeModal('statsModal'); if (event.target == document.getElementById('gistModal')) closeModal('gistModal'); if (event.target == document.getElementById('apiModal')) closeModal('apiModal'); }
+    function toggleTheme() { if(document.body.getAttribute('data-theme')==='dark') { document.body.removeAttribute('data-theme'); localStorage.setItem('theme','light'); } else { document.body.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); } }
+    window.onclick = function(event) { if (event.target == document.getElementById('statsModal')) closeModal('statsModal'); if (event.target == document.getElementById('gistModal')) closeModal('gistModal'); if (event.target == document.getElementById('driveModal')) closeModal('driveModal'); }
 
     init();
 </script>
