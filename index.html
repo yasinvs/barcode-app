@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akıllı Barkod Tarayıcı V3</title>
+    <title>Depo Barkod Sistemi</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#007bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3502/3502601.png">
+
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; background: #f0f2f5; }
@@ -20,15 +27,8 @@
         button.delete-folder { background: #dc3545; float: right; }
         button.export { background: #28a745; width: 100%; margin-top: 15px; font-size: 1.1em; }
         
-        /* Tekil Silme Butonu (Küçük X) */
         .btn-item-delete {
-            background: #ffcccc;
-            color: #cc0000;
-            padding: 5px 10px;
-            margin-left: 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            border: 1px solid #ffaaaa;
+            background: #ffcccc; color: #cc0000; padding: 5px 10px; margin-left: 10px; border-radius: 4px; font-size: 12px; border: 1px solid #ffaaaa;
         }
         
         /* Kamera Alanı */
@@ -45,22 +45,7 @@
 
         /* Bildirim Kutusu (Toast) */
         #notification {
-            visibility: hidden;
-            min-width: 250px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 50px;
-            padding: 16px;
-            position: fixed;
-            z-index: 1000;
-            left: 50%;
-            top: 30px;
-            transform: translateX(-50%);
-            font-size: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            opacity: 0;
-            transition: opacity 0.3s, top 0.3s;
+            visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 1000; left: 50%; top: 30px; transform: translateX(-50%); font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.3s, top 0.3s;
         }
         #notification.show { visibility: visible; opacity: 1; top: 50px; }
         #notification.success { background-color: #28a745; }
@@ -72,7 +57,7 @@
 <div id="notification">Bildirim</div>
 
 <div class="container">
-    <h2>📦 Depo Sayım V3</h2>
+    <h2>📦 Depo Sayım PWA</h2>
 
     <div class="controls">
         <label>Aktif Klasör:</label><br>
@@ -92,15 +77,21 @@
 </div>
 
 <script>
-    // --- 1. Veri Yönetimi ---
+    // --- PWA Service Worker Kaydı ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('Service Worker Kayıtlı', reg))
+                .catch(err => console.log('SW Hatası:', err));
+        });
+    }
+
+    // --- Mevcut Uygulama Kodları ---
     let folders = JSON.parse(localStorage.getItem('folders')) || ['Genel'];
     let scans = JSON.parse(localStorage.getItem('scans')) || []; 
     let currentFolder = folders[0];
-    
-    // Spam koruması
     let scanCooldown = false;
 
-    // --- 2. Başlatma ---
     function init() {
         const select = document.getElementById('folderSelect');
         select.innerHTML = '';
@@ -114,7 +105,6 @@
         loadScans();
     }
 
-    // --- 3. Kamera Ayarları ---
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
     
     function onScanSuccess(decodedText, decodedResult) {
@@ -123,8 +113,6 @@
         setTimeout(() => { scanCooldown = false; }, 1500);
 
         currentFolder = document.getElementById('folderSelect').value;
-
-        // Duplicate Kontrolü
         const exists = scans.some(s => s.folder === currentFolder && s.code === decodedText);
 
         if (exists) {
@@ -136,11 +124,9 @@
                 code: decodedText,
                 time: new Date().toLocaleString('tr-TR')
             };
-            
             scans.unshift(newScan);
             localStorage.setItem('scans', JSON.stringify(scans));
             loadScans();
-            
             showToast(`✅ Eklendi: ${decodedText}`, "success");
             if(navigator.vibrate) navigator.vibrate(50);
         }
@@ -148,17 +134,11 @@
     
     html5QrcodeScanner.render(onScanSuccess);
 
-    // --- 4. Yardımcı Fonksiyonlar ---
-
-    // Tekil Silme Fonksiyonu (YENİ EKLENDİ)
     function deleteItem(codeToDelete) {
-        if(confirm(`"${codeToDelete}" kodlu kaydı silmek istiyor musunuz?`)) {
-            // Sadece şu anki klasörde olan ve kodu eşleşen öğeyi çıkarıyoruz
+        if(confirm(`"${codeToDelete}" silinsin mi?`)) {
             scans = scans.filter(s => !(s.folder === currentFolder && s.code === codeToDelete));
-            
             localStorage.setItem('scans', JSON.stringify(scans));
             loadScans();
-            showToast("Kayıt silindi.", "error");
         }
     }
 
@@ -179,21 +159,17 @@
             input.value = '';
             init();
             showToast("Klasör oluşturuldu", "success");
-        } else {
-            alert("Geçersiz isim!");
-        }
+        } else { alert("Geçersiz isim!"); }
     }
 
     function deleteFolder() {
         const select = document.getElementById('folderSelect');
         const folderToDelete = select.value;
-        if(confirm(folderToDelete + " klasörü ve içindeki her şey silinecek?")) {
+        if(confirm(folderToDelete + " klasörü silinecek?")) {
             folders = folders.filter(f => f !== folderToDelete);
             scans = scans.filter(s => s.folder !== folderToDelete);
-            
             if(folders.length === 0) folders = ['Genel'];
             currentFolder = folders[0];
-            
             localStorage.setItem('folders', JSON.stringify(folders));
             localStorage.setItem('scans', JSON.stringify(scans));
             init();
@@ -204,24 +180,13 @@
     function loadScans() {
         currentFolder = document.getElementById('folderSelect').value;
         document.getElementById('folderNameDisplay').innerText = currentFolder;
-
         const list = document.getElementById('scan-list');
         list.innerHTML = '';
-        
         const filteredScans = scans.filter(s => s.folder === currentFolder);
         document.getElementById('count').innerText = filteredScans.length;
-
         filteredScans.forEach(s => {
             let li = document.createElement('li');
-            
-            // HTML yapısını düzenledik: Sol tarafta bilgi, sağ tarafta silme butonu
-            li.innerHTML = `
-                <div class="item-info">
-                    <span class="code-text">${s.code}</span>
-                    <span class="timestamp">${s.time}</span>
-                </div>
-                <button onclick="deleteItem('${s.code}')" class="btn-item-delete">X</button>
-            `;
+            li.innerHTML = `<div class="item-info"><span class="code-text">${s.code}</span><span class="timestamp">${s.time}</span></div><button onclick="deleteItem('${s.code}')" class="btn-item-delete">X</button>`;
             list.appendChild(li);
         });
     }
@@ -229,16 +194,9 @@
     function exportToCSV() {
         currentFolder = document.getElementById('folderSelect').value;
         const filteredScans = scans.filter(s => s.folder === currentFolder);
-        
         if(filteredScans.length === 0) { alert("Bu klasör boş!"); return; }
-
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-        csvContent += "Barkod;Tarih;Klasör\r\n";
-
-        filteredScans.forEach(row => {
-            csvContent += `${row.code};${row.time};${row.folder}\r\n`;
-        });
-
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFFBarkod;Tarih;Klasör\r\n";
+        filteredScans.forEach(row => { csvContent += `${row.code};${row.time};${row.folder}\r\n`; });
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
@@ -247,9 +205,8 @@
         link.click();
         document.body.removeChild(link);
     }
-
+    
     init();
 </script>
-
 </body>
 </html>
