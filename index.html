@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Barkod Master v7</title>
+    <title>Barkod Master v9 (Clean)</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
@@ -28,7 +28,7 @@
         .theme-toggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 20px; cursor: pointer; }
 
         .controls { margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
-        select, input[type="text"], input[type="number"] { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
+        select, input[type="text"], input[type="number"], input[type="password"] { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; }
         
         .checkbox-container { display: flex; align-items: center; margin-bottom: 10px; padding: 10px; background: var(--item-bg-odd); border-radius: 8px; border: 1px solid var(--border-color); }
@@ -44,6 +44,9 @@
         button.backup { background: #6c757d; }
         button.restore { background: #6610f2; }
         button.btn-manual { background: #6610f2; flex: 0.4; }
+        
+        button.gist-btn { background: #333; color: white; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        button.gist-settings { background: none; border: 1px solid var(--text-color); color: var(--text-color); flex: 0.2; font-size: 1.2em; padding: 0; }
 
         #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; background: black; }
         #searchInput { padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; margin-top: 15px; }
@@ -72,11 +75,12 @@
         #notification.error { background-color: #dc3545; }
 
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .modal-content { background-color: var(--card-bg); padding: 20px; border-radius: 10px; width: 80%; max-width: 400px; text-align: center; color: var(--text-color); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .modal-content { background-color: var(--card-bg); padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; text-align: center; color: var(--text-color); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .stat-box { background: var(--item-bg-odd); padding: 10px; margin: 10px 0; border-radius: 8px; }
         .stat-value { font-size: 1.5em; font-weight: bold; color: var(--highlight); }
         .stat-label { font-size: 0.9em; opacity: 0.8; }
         .close-modal { margin-top: 15px; background: #dc3545; }
+        .save-modal { margin-top: 15px; background: #28a745; }
     </style>
 </head>
 <body>
@@ -89,13 +93,24 @@
         <h4 id="modalFolderName" style="margin:0; opacity:0.7"></h4>
         <div class="stat-box"><div class="stat-value" id="statUnique">0</div><div class="stat-label">Çeşit Barkod</div></div>
         <div class="stat-box"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Toplam Adet</div></div>
-        <button class="close-modal" onclick="closeStats()">Kapat</button>
+        <button class="close-modal" onclick="closeModal('statsModal')">Kapat</button>
+    </div>
+</div>
+
+<div id="gistModal" class="modal">
+    <div class="modal-content">
+        <h3>☁️ GitHub Gist Ayarları</h3>
+        <p style="font-size:0.9em; opacity:0.8;">GitHub Token'ınızı giriniz.</p>
+        <input type="password" id="gistTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxx">
+        <input type="text" id="gistIdInput" placeholder="Gist ID" readonly style="background: #eee; cursor: not-allowed;">
+        <button class="save-modal" onclick="saveGistSettings()">Kaydet</button>
+        <button class="close-modal" onclick="closeModal('gistModal')">İptal</button>
     </div>
 </div>
 
 <div class="container">
     <div class="header">
-        <h2>📦 Barkod Master <small>v7</small></h2>
+        <h2>📦 Barkod Master <small>v9</small></h2>
         <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
     </div>
 
@@ -130,10 +145,18 @@
         <button onclick="exportToCSV()" class="export">📂 Excel İndir</button>
     </div>
 
-    <div class="row" style="margin-top:10px">
-        <button onclick="backupData()" class="backup">💾 Yedekle</button>
-        <button onclick="document.getElementById('restoreInput').click()" class="restore">♻️ Geri Yükle</button>
-        <input type="file" id="restoreInput" style="display:none" onchange="restoreData(this)">
+    <div style="border-top: 1px solid var(--border-color); margin-top: 15px; padding-top: 10px;">
+        <p style="margin: 0 0 5px 0; font-size: 0.85em; opacity: 0.7; text-align: center;">Yedekleme & Geri Yükleme</p>
+        <div class="row">
+            <button onclick="backupData()" class="backup">💾 Yerel Yedek</button>
+            <button onclick="document.getElementById('restoreInput').click()" class="restore">♻️ Yerel Yükle</button>
+            <input type="file" id="restoreInput" style="display:none" onchange="restoreData(this)">
+        </div>
+        <div class="row">
+            <button onclick="showGistModal()" class="gist-settings" title="Gist Ayarları">⚙️</button>
+            <button onclick="uploadToGist()" class="gist-btn">☁️ Buluta Gönder</button>
+            <button onclick="downloadFromGist()" class="gist-btn">☁️ Buluttan Çek</button>
+        </div>
     </div>
 
     <h3>Ürünler (<span id="count">0</span>)</h3>
@@ -147,6 +170,10 @@
     let folders = JSON.parse(localStorage.getItem('folders')) || ['Genel'];
     let scans = JSON.parse(localStorage.getItem('scans')) || []; 
     let productNames = JSON.parse(localStorage.getItem('productNames')) || {}; 
+    
+    let gistToken = localStorage.getItem('gistToken') || '';
+    let gistId = localStorage.getItem('gistId') || '';
+
     let currentFolder = folders[0];
     let scanCooldown = false;
 
@@ -164,11 +191,12 @@
             select.appendChild(opt);
         });
         loadScans();
+        document.getElementById('gistIdInput').value = gistId;
+        document.getElementById('gistTokenInput').value = gistToken;
     }
 
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
     
-    // GÜNCELLENMİŞ İŞLEM FONKSİYONU (ADET DESTEKLİ)
     function processCode(code, quantityToAdd = 1) {
         if (!code) return;
         currentFolder = document.getElementById('folderSelect').value;
@@ -177,35 +205,22 @@
         
         const name = productNames[code] || "";
         const displayName = name ? name : code;
-
-        // Adet 0 veya negatif gelirse 1 yap
-        quantityToAdd = parseInt(quantityToAdd);
-        if(isNaN(quantityToAdd) || quantityToAdd < 1) quantityToAdd = 1;
+        quantityToAdd = parseInt(quantityToAdd); if(isNaN(quantityToAdd) || quantityToAdd < 1) quantityToAdd = 1;
 
         if (existingIndex !== -1) {
             if (allowDuplicates) {
-                // Mevcut adede yeni gelen adedi ekle
                 scans[existingIndex].qty = (scans[existingIndex].qty || 1) + quantityToAdd;
                 scans[existingIndex].time = new Date().toLocaleString('tr-TR');
-                
                 const updatedItem = scans.splice(existingIndex, 1)[0];
                 scans.unshift(updatedItem);
-                
                 showToast(`📦 Adet Arttı: ${displayName} (+${quantityToAdd})`, "update");
                 playBeep(600);
             } else {
                 showToast(`⚠️ HATA: Zaten var! (${displayName})`, "error");
-                if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                return;
+                if(navigator.vibrate) navigator.vibrate([100, 50, 100]); return;
             }
         } else {
-            // Yeni kayıt, girilen adetle başlat
-            const newScan = { 
-                folder: currentFolder, 
-                code: code, 
-                time: new Date().toLocaleString('tr-TR'), 
-                qty: quantityToAdd 
-            };
+            const newScan = { folder: currentFolder, code: code, time: new Date().toLocaleString('tr-TR'), qty: quantityToAdd };
             scans.unshift(newScan);
             showToast(`✅ Eklendi: ${displayName} (x${quantityToAdd})`, "success");
             playBeep(880);
@@ -214,7 +229,6 @@
         if(navigator.vibrate && (existingIndex === -1 || allowDuplicates)) navigator.vibrate(100);
     }
 
-    // Kamera her zaman 1 adet ekler
     function onScanSuccess(decodedText) {
         if (scanCooldown) return;
         scanCooldown = true; setTimeout(() => { scanCooldown = false; }, 1200);
@@ -222,42 +236,94 @@
     }
     html5QrcodeScanner.render(onScanSuccess);
 
-    // GÜNCELLENMİŞ MANUEL GİRİŞ
     function addManualCode() {
         const inputCode = document.getElementById('manualCodeInput');
         const inputQty = document.getElementById('manualQtyInput');
-        
         const code = inputCode.value.trim();
-        const qty = parseInt(inputQty.value) || 1; // Boşsa 1 al
-
-        if (code) { 
-            processCode(code, qty); 
-            inputCode.value = ''; 
-            inputQty.value = '1'; // Adedi tekrar 1'e çek
-            inputCode.focus(); // İmleci tekrar kod kutusuna koy (Seri giriş için)
-        } else { 
-            alert("Lütfen barkod yazın."); 
-        }
+        const qty = parseInt(inputQty.value) || 1; 
+        if (code) { processCode(code, qty); inputCode.value = ''; inputQty.value = '1'; inputCode.focus(); } else { alert("Barkod yazın."); }
     }
     function handleManualEnter(event) { if (event.key === "Enter") addManualCode(); }
-
     function renameItem(code) {
         const currentName = productNames[code] || "";
         const newName = prompt(`"${code}" için isim giriniz:`, currentName);
         if (newName !== null) { productNames[code] = newName.trim(); saveData(); loadScans(); }
     }
 
+    // --- GIST İŞLEMLERİ ---
+    function showGistModal() { document.getElementById('gistModal').style.display = "flex"; }
+    function closeModal(id) { document.getElementById(id).style.display = "none"; }
+    function saveGistSettings() {
+        gistToken = document.getElementById('gistTokenInput').value.trim();
+        if(!gistToken) { alert("Token boş!"); return; }
+        localStorage.setItem('gistToken', gistToken);
+        showToast("Ayarlar Kaydedildi", "success"); closeModal('gistModal');
+    }
+    async function uploadToGist() {
+        if (!gistToken) { alert("Önce Token giriniz!"); showGistModal(); return; }
+        showToast("Buluta gönderiliyor...", "update");
+        try {
+            let url = "https://api.github.com/gists";
+            let method = "POST";
+            if (gistId) { url += "/" + gistId; method = "PATCH"; }
+            
+            // Temizlik yaparak gönderelim (Gereksiz isimleri temizle)
+            cleanUpProductNames(); 
+
+            const response = await fetch(url, {
+                method: method,
+                headers: { "Authorization": `token ${gistToken}`, "Accept": "application/vnd.github.v3+json", "Content-Type": "application/json" },
+                body: JSON.stringify({ description: "Barkod Master Otomatik Yedek", public: false, files: { "barkod_master_backup.json": { content: JSON.stringify({ folders, scans, productNames }, null, 2) } } })
+            });
+            if (!response.ok) throw new Error(response.status);
+            const data = await response.json();
+            gistId = data.id; localStorage.setItem('gistId', gistId); document.getElementById('gistIdInput').value = gistId;
+            showToast("✅ Buluta Yedeklendi!", "success");
+        } catch (error) { alert("Hata: " + error.message); }
+    }
+    async function downloadFromGist() {
+        if (!gistToken) { alert("Token giriniz!"); showGistModal(); return; }
+        if (!gistId) { 
+            const manuelId = prompt("Gist ID yok. Manuel giriniz:"); 
+            if(!manuelId) return; 
+            gistId = manuelId; 
+        }
+        showToast("Buluttan çekiliyor...", "update");
+        try {
+            const response = await fetch(`https://api.github.com/gists/${gistId}`, { headers: { "Authorization": `token ${gistToken}` } });
+            if (!response.ok) throw new Error("Hata");
+            const data = await response.json();
+            if (data.files && data.files["barkod_master_backup.json"]) {
+                const content = JSON.parse(data.files["barkod_master_backup.json"].content);
+                if(confirm("Telefondaki veriler silinip bulut yedeği yüklenecek?")) {
+                    folders = content.folders; scans = content.scans; productNames = content.productNames || {};
+                    saveData(); init(); showToast("♻️ Yüklendi!", "success"); localStorage.setItem('gistId', gistId);
+                }
+            } else { alert("Yedek bulunamadı."); }
+        } catch (error) { alert("Hata: " + error.message); }
+    }
+
+    // --- TEMİZLİK MANTIĞI ---
+    function cleanUpProductNames() {
+        // Aktif kullanılan tüm kodları bul
+        const activeCodes = new Set(scans.map(s => s.code));
+        // productNames içindeki her bir anahtarı kontrol et
+        Object.keys(productNames).forEach(code => {
+            if (!activeCodes.has(code)) {
+                delete productNames[code]; // Kullanılmıyorsa sil
+            }
+        });
+    }
+
+    // --- STANDART FONKSİYONLAR ---
     function showStats() {
         currentFolder = document.getElementById('folderSelect').value;
         const filtered = scans.filter(s => s.folder === currentFolder);
-        const uniqueCount = filtered.length;
-        const totalQty = filtered.reduce((acc, curr) => acc + (curr.qty || 1), 0);
         document.getElementById('modalFolderName').innerText = currentFolder;
-        document.getElementById('statUnique').innerText = uniqueCount;
-        document.getElementById('statTotal').innerText = totalQty;
+        document.getElementById('statUnique').innerText = filtered.length;
+        document.getElementById('statTotal').innerText = filtered.reduce((acc, curr) => acc + (curr.qty || 1), 0);
         document.getElementById('statsModal').style.display = "flex";
     }
-    function closeStats() { document.getElementById('statsModal').style.display = "none"; }
     function clearList() {
         currentFolder = document.getElementById('folderSelect').value;
         if(confirm(`"${currentFolder}" içi temizlensin mi?`)) {
@@ -266,15 +332,11 @@
         }
     }
     function saveCheckboxState() { localStorage.setItem('allowDuplicates', document.getElementById('allowDuplicates').checked); }
-    
     function updateQty(code, change) {
         const index = scans.findIndex(s => s.folder === currentFolder && s.code === code);
         if (index !== -1) {
             scans[index].qty = (scans[index].qty || 1) + change;
-            if (scans[index].qty <= 0) {
-                if(confirm("Silinsin mi?")) scans.splice(index, 1);
-                else scans[index].qty = 1;
-            }
+            if (scans[index].qty <= 0) { if(confirm("Silinsin mi?")) scans.splice(index, 1); else scans[index].qty = 1; }
             saveData(); loadScans();
         }
     }
@@ -284,72 +346,53 @@
             saveData(); loadScans();
         }
     }
-
     function loadScans() {
         currentFolder = document.getElementById('folderSelect').value;
         const list = document.getElementById('scan-list');
         list.innerHTML = '';
         const term = document.getElementById('searchInput').value.toLowerCase();
-        
         const filtered = scans.filter(s => {
             const name = (productNames[s.code] || "").toLowerCase();
             return s.folder === currentFolder && (s.code.toLowerCase().includes(term) || name.includes(term));
         });
-
         document.getElementById('count').innerText = filtered.length;
-        
         filtered.forEach(s => {
             const pName = productNames[s.code] || ""; 
             let li = document.createElement('li');
             li.innerHTML = `
-                <div class="item-left">
-                    <span class="qty-badge">x${s.qty||1}</span>
-                    <div class="item-info">
-                        ${pName ? `<span class="name-text">${pName}</span>` : ''}
-                        <span class="code-text" style="${pName ? 'font-size:0.85em; opacity:0.8; font-weight:normal;' : ''}">${s.code}</span>
-                        <span class="timestamp">${s.time}</span>
-                    </div>
-                </div>
-                <div class="btn-controls">
-                    <button onclick="renameItem('${s.code}')" class="btn-small btn-edit">✎</button>
-                    <button onclick="updateQty('${s.code}',1)" class="btn-small btn-plus">+</button>
-                    <button onclick="updateQty('${s.code}',-1)" class="btn-small btn-minus">-</button>
-                    <button onclick="deleteItem('${s.code}')" class="btn-small btn-del">🗑️</button>
-                </div>`;
+                <div class="item-left"><span class="qty-badge">x${s.qty||1}</span>
+                <div class="item-info">${pName ? `<span class="name-text">${pName}</span>` : ''}
+                <span class="code-text" style="${pName ? 'font-size:0.85em; opacity:0.8; font-weight:normal;' : ''}">${s.code}</span>
+                <span class="timestamp">${s.time}</span></div></div>
+                <div class="btn-controls"><button onclick="renameItem('${s.code}')" class="btn-small btn-edit">✎</button>
+                <button onclick="updateQty('${s.code}',1)" class="btn-small btn-plus">+</button>
+                <button onclick="updateQty('${s.code}',-1)" class="btn-small btn-minus">-</button>
+                <button onclick="deleteItem('${s.code}')" class="btn-small btn-del">🗑️</button></div>`;
             list.appendChild(li);
         });
     }
-
     function filterList() { loadScans(); }
-
     function exportToCSV() {
         currentFolder = document.getElementById('folderSelect').value;
         const filtered = scans.filter(s => s.folder === currentFolder);
         if(filtered.length === 0) { alert("Boş!"); return; }
-        
         let csv = "data:text/csv;charset=utf-8,\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n";
-        filtered.forEach(r => {
-            const name = productNames[r.code] || "";
-            const safeName = name.replace(/;/g, " ");
-            csv += `${r.code};${safeName};${r.qty||1};${r.time};${r.folder}\r\n`; 
-        });
-        
+        filtered.forEach(r => { csv += `${r.code};${(productNames[r.code]||"").replace(/;/g, " ")};${r.qty||1};${r.time};${r.folder}\r\n`; });
         const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `Stok_${currentFolder}.csv`;
         document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
-
     function saveData() { 
+        cleanUpProductNames(); // Kaydetmeden önce temizlik yap
         localStorage.setItem('scans', JSON.stringify(scans)); 
         localStorage.setItem('folders', JSON.stringify(folders));
         localStorage.setItem('productNames', JSON.stringify(productNames));
     }
-    
     function addFolder() { 
         const name = document.getElementById('newFolderInput').value.trim();
         if (name && !folders.includes(name)) { folders.push(name); saveData(); currentFolder=name; document.getElementById('newFolderInput').value=''; init(); } 
     }
     function deleteFolder() { 
-        if(confirm("Klasör ve içeriği silinsin mi?")) { 
+        if(confirm("Silinsin mi?")) { 
             folders = folders.filter(f=>f!==document.getElementById('folderSelect').value); 
             scans=scans.filter(s=>s.folder!==currentFolder); 
             if(folders.length===0) folders=['Genel']; currentFolder=folders[0]; saveData(); init(); 
@@ -362,14 +405,7 @@
     function restoreData(input) {
         const file = input.files[0]; if(!file) return;
         const reader = new FileReader();
-        reader.onload = e => { 
-            try { 
-                const d=JSON.parse(e.target.result); 
-                folders=d.folders; scans=d.scans; 
-                if(d.productNames) productNames=d.productNames; 
-                saveData(); init(); showToast("Yüklendi!","success"); 
-            } catch(err){alert("Hata");} 
-        };
+        reader.onload = e => { try { const d=JSON.parse(e.target.result); folders=d.folders; scans=d.scans; if(d.productNames) productNames=d.productNames; saveData(); init(); showToast("Yüklendi!","success"); } catch(err){alert("Hata");} };
         reader.readAsText(file);
     }
     function playBeep(freq) {
@@ -384,7 +420,7 @@
         if(document.body.getAttribute('data-theme')==='dark') { document.body.removeAttribute('data-theme'); localStorage.setItem('theme','light'); } 
         else { document.body.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
     }
-    window.onclick = function(event) { if (event.target == document.getElementById('statsModal')) closeStats(); }
+    window.onclick = function(event) { if (event.target == document.getElementById('statsModal')) closeModal('statsModal'); if (event.target == document.getElementById('gistModal')) closeModal('gistModal'); }
 
     init();
 </script>
