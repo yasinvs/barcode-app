@@ -26,8 +26,7 @@ HTML5, CSS3 ve Vanilla JavaScript ile geliştirilmiştir. Harici bir sunucuya ve
 * **🌙 Karanlık Mod:** Göz yormayan ve pil dostu arayüz.
 
 ## 📸 Ekran Görüntüleri
-
-*(Buraya projenin ekran görüntülerini ekleyebilirsiniz. Örn: `screenshots/demo.png`)*
+![screenshot](https://yasinvs.github.io/barcode-app/screeshot.png)
 
 ## 🛠️ Kurulum ve Kullanım
 
