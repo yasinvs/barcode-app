@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Barkod Master v14 (Secure)</title>
+    <title>Barkod Master v15 (Config)</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
@@ -12,22 +12,27 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
-        /* CSS AYNI - Değişiklik Yok */
+        /* CSS STİLLERİ */
         :root { --bg-color: #f0f2f5; --card-bg: #ffffff; --text-color: #333333; --border-color: #eeeeee; --item-bg-odd: #fafafa; --highlight: #007bff; }
         [data-theme="dark"] { --bg-color: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --border-color: #333333; --item-bg-odd: #252525; --highlight: #4dabf7; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; background: var(--bg-color); color: var(--text-color); transition: 0.3s; user-select: none; }
         .container { max-width: 600px; margin: 0 auto; background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         h2 { margin: 0; font-size: 1.4em; }
-        .theme-toggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 20px; cursor: pointer; }
+        
+        /* Buton Grubu (Header) */
+        .header-buttons { display: flex; gap: 10px; }
+        .theme-toggle, .settings-toggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 20px; cursor: pointer; font-size: 1.2em; }
+        
         .controls { margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
-        select, input[type="text"], input[type="number"], input[type="password"], input[type="url"] { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
+        select, input { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; }
         .checkbox-container { display: flex; align-items: center; margin-bottom: 10px; padding: 10px; background: var(--item-bg-odd); border-radius: 8px; border: 1px solid var(--border-color); }
         .checkbox-container input { width: 20px; height: 20px; margin-right: 10px; cursor: pointer; }
         .checkbox-container label { font-weight: bold; cursor: pointer; flex: 1; }
         button { padding: 12px; background: var(--highlight); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 1; font-size: 14px; }
         button:active { transform: scale(0.98); }
+        
         button.delete-folder { background: #dc3545; flex: 0.3; }
         button.clear-list { background: #ffc107; color: black; flex: 0.3; }
         button.export { background: #28a745; width: 100%; margin-top: 5px; }
@@ -35,10 +40,27 @@
         button.backup { background: #6c757d; }
         button.restore { background: #6610f2; }
         button.btn-manual { background: #6610f2; flex: 0.4; }
-        button.icon-btn { background: none; border: 1px solid var(--text-color); color: var(--text-color); flex: 0.2; font-size: 1.2em; padding: 0; }
-        button.gist-btn { background: #333; color: white; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        button.drive-btn { background: #198754; color: white; display: flex; align-items: center; justify-content: center; gap: 5px; }
         
+        button.gist-btn { background: #333; color: white; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        button.drive-btn { background: #198754; color: white; display: flex; align-items: center; justify-content: center; gap: 5px; } 
+        button.api-btn { background: #d63384; color: white; }
+        
+        /* Modal Stilleri (Unified) */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; overflow-y: auto; }
+        .modal-content { background-color: var(--card-bg); padding: 20px; border-radius: 10px; width: 90%; max-width: 450px; color: var(--text-color); box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .modal-section { margin-bottom: 20px; text-align: left; }
+        .modal-section h4 { margin: 0 0 10px 0; color: var(--highlight); font-size: 1em; display: flex; align-items: center; gap: 5px; }
+        
+        .stat-box { background: var(--item-bg-odd); padding: 10px; margin: 10px 0; border-radius: 8px; text-align: center; }
+        .stat-value { font-size: 1.5em; font-weight: bold; color: var(--highlight); }
+        .stat-label { font-size: 0.9em; opacity: 0.8; }
+        
+        .close-modal { margin-top: 15px; background: #dc3545; width: 100%; }
+        .save-modal { margin-top: 5px; background: #28a745; width: 100%; }
+        .config-btn { background: #6c757d; font-size: 0.9em; padding: 8px; margin-top: 5px; }
+
+        /* Liste vs */
         #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; background: black; }
         #searchInput { padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; margin-top: 15px; }
         #scan-list { list-style: none; padding: 0; max-height: 350px; overflow-y: auto; }
@@ -61,14 +83,6 @@
         #notification.success { background-color: #28a745; }
         #notification.update { background-color: #17a2b8; } 
         #notification.error { background-color: #dc3545; }
-        
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .modal-content { background-color: var(--card-bg); padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; text-align: center; color: var(--text-color); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .stat-box { background: var(--item-bg-odd); padding: 10px; margin: 10px 0; border-radius: 8px; }
-        .stat-value { font-size: 1.5em; font-weight: bold; color: var(--highlight); }
-        .stat-label { font-size: 0.9em; opacity: 0.8; }
-        .close-modal { margin-top: 15px; background: #dc3545; }
-        .save-modal { margin-top: 15px; background: #28a745; }
     </style>
 </head>
 <body>
@@ -85,33 +99,51 @@
     </div>
 </div>
 
-<div id="gistModal" class="modal">
+<div id="settingsModal" class="modal">
     <div class="modal-content">
-        <h3>☁️ GitHub Gist Ayarları</h3>
-        <input type="password" id="gistTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxx">
-        <input type="text" id="gistIdInput" placeholder="Gist ID (Otomatik)" readonly style="background: #eee; cursor: not-allowed;">
-        <button class="save-modal" onclick="saveGistSettings()">Kaydet</button>
-        <button class="close-modal" onclick="closeModal('gistModal')">İptal</button>
-    </div>
-</div>
+        <div class="modal-header">
+            <h3 style="margin:0">⚙️ Sistem Ayarları</h3>
+            <span onclick="closeModal('settingsModal')" style="cursor:pointer; font-size:1.5em;">&times;</span>
+        </div>
 
-<div id="driveModal" class="modal">
-    <div class="modal-content">
-        <h3>Google Entegrasyon</h3>
-        <p style="font-size:0.8em; opacity:0.8;">Web App URL'i ve belirlediğiniz şifreyi girin.</p>
-        
-        <input type="url" id="driveUrlInput" placeholder="https://script.google.com/macros/s/...">
-        <input type="password" id="driveSecretInput" placeholder="Script Şifreniz (Secret Key)">
-        
-        <button class="save-modal" onclick="saveDriveSettings()">Kaydet</button>
-        <button class="close-modal" onclick="closeModal('driveModal')">İptal</button>
+        <div class="modal-section">
+            <h4>☁️ GitHub Gist</h4>
+            <input type="password" id="setGistToken" placeholder="GitHub Token (ghp_...)">
+            <input type="text" id="setGistId" placeholder="Gist ID (Otomatik)" readonly style="background:#eee">
+        </div>
+
+        <div class="modal-section">
+            <h4>📊 Google Drive / Sheets</h4>
+            <input type="url" id="setDriveUrl" placeholder="Apps Script Web App URL">
+            <input type="password" id="setDriveSecret" placeholder="Secret Key (Şifre)">
+        </div>
+
+        <div class="modal-section">
+            <h4>📡 Custom API</h4>
+            <input type="url" id="setApiUrl" placeholder="API Endpoint URL">
+        </div>
+
+        <div class="modal-section" style="border-top:1px solid var(--border-color); padding-top:10px;">
+            <h4>🔄 Ayar Transferi</h4>
+            <p style="font-size:0.8em; opacity:0.8;">Bu ayarları başka cihaza taşımak için:</p>
+            <div class="row">
+                <button onclick="exportConfig()" class="config-btn">📤 Ayarları İndir</button>
+                <button onclick="document.getElementById('configInput').click()" class="config-btn" style="background:#17a2b8">📥 Ayarları Yükle</button>
+                <input type="file" id="configInput" style="display:none" onchange="importConfig(this)">
+            </div>
+        </div>
+
+        <button class="save-modal" onclick="saveAllSettings()">💾 Hepsini Kaydet</button>
     </div>
 </div>
 
 <div class="container">
     <div class="header">
-        <h2>📦 Barkod Master <small>v14</small></h2>
-        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        <h2>📦 Barkod Master <small>v15</small></h2>
+        <div class="header-buttons">
+            <button class="settings-toggle" onclick="openSettings()">⚙️ Ayarlar</button>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        </div>
     </div>
 
     <div class="controls">
@@ -155,15 +187,14 @@
         </div>
 
         <div class="row">
-            <button onclick="showGistModal()" class="icon-btn" title="Gist Ayar">⚙️</button>
             <button onclick="uploadToGist()" class="gist-btn">☁️ Gist Yedek</button>
             <button onclick="downloadFromGist()" class="gist-btn">☁️ Gist Çek</button>
         </div>
         
         <div class="row">
-            <button onclick="showDriveModal()" class="icon-btn" title="Drive Ayar">⚙️</button>
-            <button onclick="sendToGoogle('report')" class="drive-btn" style="background:#198754">📊 Sheets'e Yaz</button>
-            <button onclick="sendToGoogle('backup')" class="drive-btn" style="background:#0d6efd">💾 Drive'a Yedekle</button>
+            <button onclick="sendToGoogle('report')" class="drive-btn" style="background:#198754">📊 Sheets</button>
+            <button onclick="sendToGoogle('backup')" class="drive-btn" style="background:#0d6efd">💾 Drive</button>
+            <button onclick="uploadReportToCustomApi()" class="api-btn">📡 API</button>
         </div>
     </div>
 
@@ -179,11 +210,12 @@
     let scans = JSON.parse(localStorage.getItem('scans')) || []; 
     let productNames = JSON.parse(localStorage.getItem('productNames')) || {}; 
     
-    // Ayarlar
+    // Global Ayar Değişkenleri
     let gistToken = localStorage.getItem('gistToken') || '';
     let gistId = localStorage.getItem('gistId') || '';
     let driveUrl = localStorage.getItem('driveUrl') || '';
-    let driveSecret = localStorage.getItem('driveSecret') || ''; // Şifre Hafızadan
+    let driveSecret = localStorage.getItem('driveSecret') || '';
+    let customApiUrl = localStorage.getItem('customApiUrl') || '';
 
     let currentFolder = folders[0];
     let scanCooldown = false;
@@ -202,10 +234,6 @@
             select.appendChild(opt);
         });
         loadScans();
-        document.getElementById('gistIdInput').value = gistId;
-        document.getElementById('gistTokenInput').value = gistToken;
-        document.getElementById('driveUrlInput').value = driveUrl;
-        document.getElementById('driveSecretInput').value = driveSecret; // Ayarlar penceresine şifreyi yükle
     }
 
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
@@ -259,73 +287,83 @@
         if (newName !== null) { productNames[code] = newName.trim(); saveData(); loadScans(); }
     }
 
-    // --- GOOGLE DRIVE AYARLARI (GÜNCELLENDİ) ---
-    function showDriveModal() { document.getElementById('driveModal').style.display = "flex"; }
-    function saveDriveSettings() {
-        driveUrl = document.getElementById('driveUrlInput').value.trim();
-        driveSecret = document.getElementById('driveSecretInput').value.trim(); // Şifreyi al
+    // --- AYARLAR YÖNETİMİ (YENİ - UNIFIED) ---
+    function openSettings() {
+        document.getElementById('setGistToken').value = gistToken;
+        document.getElementById('setGistId').value = gistId;
+        document.getElementById('setDriveUrl').value = driveUrl;
+        document.getElementById('setDriveSecret').value = driveSecret;
+        document.getElementById('setApiUrl').value = customApiUrl;
+        document.getElementById('settingsModal').style.display = "flex";
+    }
+
+    function saveAllSettings() {
+        gistToken = document.getElementById('setGistToken').value.trim();
+        // ID değişirse sıfırlamıyoruz, sadece token güncelliyoruz genelde. Ama kullanıcı silerse silinir.
+        // gistId elle girilmez, otomatik gelir ama gösteriyoruz.
         
-        if(!driveUrl || !driveSecret) { alert("Lütfen URL ve Şifreyi girin!"); return; }
+        driveUrl = document.getElementById('setDriveUrl').value.trim();
+        driveSecret = document.getElementById('setDriveSecret').value.trim();
+        customApiUrl = document.getElementById('setApiUrl').value.trim();
 
-        localStorage.setItem('driveUrl', driveUrl);
-        localStorage.setItem('driveSecret', driveSecret); // Hafızaya yaz
-        showToast("Ayarlar Kaydedildi", "success"); closeModal('driveModal');
-    }
-
-    async function sendToGoogle(operation) {
-        if (!driveUrl || !driveSecret) { alert("Önce Ayarlardan (⚙️) URL ve Şifre girin!"); showDriveModal(); return; }
-
-        showToast("Google'a gönderiliyor...", "update");
-
-        let csvContent = "Barkod;Urun_Adi;Adet;Tarih;Klasör\n";
-        scans.forEach(r => {
-             const name = (productNames[r.code] || "").replace(/;/g, " ");
-             csvContent += `${r.code};${name};${r.qty||1};${r.time};${r.folder}\n`;
-        });
-        const jsonContent = JSON.stringify({ folders, scans, productNames }, null, 2);
-
-        const payload = {
-            secret: driveSecret, // <-- HAFIZADAKİ ŞİFRE BURAYA OTOMATİK GELİYOR
-            operation: operation,
-            csvContent: csvContent,
-            jsonContent: jsonContent
-        };
-
-        try {
-            await fetch(driveUrl, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-            showToast("✅ Gönderildi!", "success");
-        } catch (error) {
-            alert("Hata: " + error.message);
-        }
-    }
-
-    // --- GIST ---
-    function showGistModal() { document.getElementById('gistModal').style.display = "flex"; }
-    function closeModal(id) { document.getElementById(id).style.display = "none"; }
-    function saveGistSettings() {
-        gistToken = document.getElementById('gistTokenInput').value.trim();
-        if(!gistToken) { alert("Token boş!"); return; }
         localStorage.setItem('gistToken', gistToken);
-        gistId = ''; localStorage.removeItem('gistId'); document.getElementById('gistIdInput').value = '';
-        showToast("Token Kaydedildi", "success"); closeModal('gistModal');
+        localStorage.setItem('driveUrl', driveUrl);
+        localStorage.setItem('driveSecret', driveSecret);
+        localStorage.setItem('customApiUrl', customApiUrl);
+
+        showToast("Tüm Ayarlar Kaydedildi!", "success");
+        closeModal('settingsModal');
     }
+
+    function exportConfig() {
+        const config = {
+            gistToken: gistToken,
+            driveUrl: driveUrl,
+            driveSecret: driveSecret,
+            customApiUrl: customApiUrl
+        };
+        const blob = new Blob([JSON.stringify(config, null, 2)], {type: "application/json"});
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "barkod_master_config.json"; 
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    }
+
+    function importConfig(input) {
+        const file = input.files[0]; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            try {
+                const config = JSON.parse(e.target.result);
+                if(config.gistToken !== undefined) gistToken = config.gistToken;
+                if(config.driveUrl !== undefined) driveUrl = config.driveUrl;
+                if(config.driveSecret !== undefined) driveSecret = config.driveSecret;
+                if(config.customApiUrl !== undefined) customApiUrl = config.customApiUrl;
+                
+                // Formu güncelle
+                document.getElementById('setGistToken').value = gistToken;
+                document.getElementById('setDriveUrl').value = driveUrl;
+                document.getElementById('setDriveSecret').value = driveSecret;
+                document.getElementById('setApiUrl').value = customApiUrl;
+
+                saveAllSettings(); // Otomatik kaydet
+                alert("Ayarlar başarıyla yüklendi!");
+            } catch(err) { alert("Dosya hatalı!"); }
+        };
+        reader.readAsText(file);
+    }
+
+    // --- BULUT FONKSİYONLARI ---
     async function findGistId() {
         try {
             const response = await fetch("https://api.github.com/gists", { headers: { "Authorization": `token ${gistToken}` } });
             if (!response.ok) return null;
             const gists = await response.json();
             const foundGist = gists.find(g => g.files && g.files["barkod_master_backup.json"]);
-            if (foundGist) { gistId = foundGist.id; localStorage.setItem('gistId', gistId); document.getElementById('gistIdInput').value = gistId; return gistId; }
+            if (foundGist) { gistId = foundGist.id; localStorage.setItem('gistId', gistId); document.getElementById('setGistId').value = gistId; return gistId; }
             return null;
         } catch { return null; }
     }
     async function uploadToGist() {
-        if (!gistToken) { alert("Önce Token!"); showGistModal(); return; }
+        if (!gistToken) { alert("Ayarlardan Token girin!"); openSettings(); return; }
         if (!gistId) await findGistId();
         showToast("Yedekleniyor...", "update");
         try {
@@ -339,12 +377,12 @@
             });
             if (!response.ok) throw new Error(response.status);
             const data = await response.json();
-            gistId = data.id; localStorage.setItem('gistId', gistId); document.getElementById('gistIdInput').value = gistId;
+            gistId = data.id; localStorage.setItem('gistId', gistId);
             showToast("✅ Yedeklendi!", "success");
         } catch (error) { alert("Hata: " + error.message); }
     }
     async function downloadFromGist() {
-        if (!gistToken) { alert("Token!"); showGistModal(); return; }
+        if (!gistToken) { alert("Token Yok!"); openSettings(); return; }
         if (!gistId) { const found = await findGistId(); if (!found) { alert("Yedek bulunamadı."); return; } }
         showToast("Çekiliyor...", "update");
         try {
@@ -353,15 +391,38 @@
             const data = await response.json();
             if (data.files && data.files["barkod_master_backup.json"]) {
                 const content = JSON.parse(data.files["barkod_master_backup.json"].content);
-                if(confirm("Yedek yüklensin mi? (Mevcut veriler silinir)")) {
+                if(confirm("Yedek yüklensin mi?")) {
                     folders = content.folders; scans = content.scans; productNames = content.productNames || {};
                     saveData(); init(); showToast("♻️ Yüklendi!", "success");
                 }
             } else { alert("Dosya bozuk."); }
         } catch (error) { alert("Hata: " + error.message); }
     }
+    async function sendToGoogle(operation) {
+        if (!driveUrl || !driveSecret) { alert("Ayarlardan Drive bilgisi girin!"); openSettings(); return; }
+        showToast("Google'a gönderiliyor...", "update");
+        let csvContent = "Barkod;Urun_Adi;Adet;Tarih;Klasör\n";
+        scans.forEach(r => { const name = (productNames[r.code] || "").replace(/;/g, " "); csvContent += `${r.code};${name};${r.qty||1};${r.time};${r.folder}\n`; });
+        const payload = { secret: driveSecret, operation: operation, csvContent: csvContent, jsonContent: JSON.stringify({ folders, scans, productNames }, null, 2) };
+        try {
+            await fetch(driveUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+            showToast("✅ Gönderildi!", "success");
+        } catch (error) { alert("Hata: " + error.message); }
+    }
+    async function uploadReportToCustomApi() {
+        if (!customApiUrl) { alert("API URL girin!"); openSettings(); return; }
+        showToast("API'ye gönderiliyor...", "update");
+        let csvContent = "\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n";
+        scans.forEach(r => { const name = (productNames[r.code] || "").replace(/;/g, " "); csvContent += `${r.code};${name};${r.qty||1};${r.time};${r.folder}\r\n`; });
+        const payload = { source: "BarkodMaster", timestamp: new Date().toLocaleString(), filename: "Tum_Stok_Raporu.csv", csvContent: csvContent };
+        try {
+            const response = await fetch(customApiUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+            if (response.ok) { showToast("✅ API'ye İletildi!", "success"); } else { throw new Error(response.status); }
+        } catch (error) { alert("Hata: " + error.message); }
+    }
 
     // --- STANDART ---
+    function closeModal(id) { document.getElementById(id).style.display = "none"; }
     function cleanUpProductNames() { const activeCodes = new Set(scans.map(s => s.code)); Object.keys(productNames).forEach(code => { if (!activeCodes.has(code)) delete productNames[code]; }); }
     function showStats() {
         currentFolder = document.getElementById('folderSelect').value;
@@ -406,7 +467,7 @@
     function playBeep(freq) { if(audioCtx.state==='suspended') audioCtx.resume(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.type="square"; o.frequency.value=freq; g.gain.value=0.1; o.start(); setTimeout(()=>o.stop(), 150); }
     function showToast(msg, type) { const x=document.getElementById("notification"); x.className="show "+type; x.innerText=msg; setTimeout(()=>x.className="", 2000); }
     function toggleTheme() { if(document.body.getAttribute('data-theme')==='dark') { document.body.removeAttribute('data-theme'); localStorage.setItem('theme','light'); } else { document.body.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); } }
-    window.onclick = function(event) { if (event.target == document.getElementById('statsModal')) closeModal('statsModal'); if (event.target == document.getElementById('gistModal')) closeModal('gistModal'); if (event.target == document.getElementById('driveModal')) closeModal('driveModal'); }
+    window.onclick = function(event) { if (event.target == document.getElementById('statsModal')) closeModal('statsModal'); if (event.target == document.getElementById('settingsModal')) closeModal('settingsModal'); }
 
     init();
 </script>
