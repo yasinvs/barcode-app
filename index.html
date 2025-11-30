@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Barkod Master v16 (Organized)</title>
+    <title>Barkod Master v17 (Turbo)</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
@@ -12,6 +12,7 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
+        /* CSS AYNI - Değişmedi */
         :root { --bg-color: #f0f2f5; --card-bg: #ffffff; --text-color: #333333; --border-color: #eeeeee; --item-bg-odd: #fafafa; --highlight: #007bff; }
         [data-theme="dark"] { --bg-color: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --border-color: #333333; --item-bg-odd: #252525; --highlight: #4dabf7; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; background: var(--bg-color); color: var(--text-color); transition: 0.3s; user-select: none; }
@@ -33,17 +34,14 @@
         button.clear-list { background: #ffc107; color: black; flex: 0.3; }
         button.btn-manual { background: #6610f2; flex: 0.4; }
         
-        /* Ana Menü Butonları */
         .main-menu-btn { padding: 15px; font-size: 1.1em; margin-bottom: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-backup-menu { background: #0d6efd; }
         .btn-report-menu { background: #198754; }
 
-        /* Modal İçindeki Butonlar */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .full-width { grid-column: span 2; }
         .menu-btn { padding: 15px; font-size: 0.9em; display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; }
         
-        /* Modal Stilleri */
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; overflow-y: auto; }
         .modal-content { background-color: var(--card-bg); padding: 20px; border-radius: 10px; width: 90%; max-width: 450px; color: var(--text-color); box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
@@ -54,9 +52,9 @@
         .stat-label { font-size: 0.9em; opacity: 0.8; }
         .close-modal { margin-top: 15px; background: #dc3545; width: 100%; }
         .save-modal { margin-top: 5px; background: #28a745; width: 100%; }
-        
-        /* Liste */
-        #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; background: black; }
+        .config-btn { background: #6c757d; font-size: 0.9em; padding: 8px; margin-top: 5px; }
+
+        #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; background: black; min-height: 250px; }
         #searchInput { padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; margin-top: 15px; }
         #scan-list { list-style: none; padding: 0; max-height: 350px; overflow-y: auto; }
         #scan-list li { padding: 12px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
@@ -183,7 +181,7 @@
 
 <div class="container">
     <div class="header">
-        <h2>📦 Barkod Master <small>v16</small></h2>
+        <h2>📦 Barkod Master <small>v17 Pro</small></h2>
         <div class="header-buttons">
             <button class="settings-toggle" onclick="openSettings()">⚙️</button>
             <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
@@ -262,7 +260,26 @@
         loadScans();
     }
 
-    const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+    // --- BURASI DEĞİŞTİ: YÜKSEK PERFORMANS AYARLARI ---
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader", 
+        { 
+            fps: 10, 
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0,
+            // BU KISIM NATIVE (DONANIM) TARAMAYI AÇAR
+            experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true
+            },
+            videoConstraints: {
+                facingMode: "environment", // Arka Kamera
+                width: { min: 640, ideal: 1280, max: 1920 }, // HD Çözünürlük İsteği
+                height: { min: 480, ideal: 720, max: 1080 },
+                focusMode: "continuous" // Sürekli Odaklama
+            }
+        },
+        /* verbose= */ false
+    );
     
     function processCode(code, quantityToAdd = 1) {
         if (!code) return;
@@ -464,7 +481,7 @@
         document.getElementById('modalFolderName').innerText = currentFolder;
         document.getElementById('statUnique').innerText = filtered.length;
         document.getElementById('statTotal').innerText = filtered.reduce((acc, curr) => acc + (curr.qty || 1), 0);
-        openModal('statsDetailModal'); // Eski ID'yi güncelledik
+        openModal('statsDetailModal');
     }
     function clearList() { if(confirm("Temizlensin mi?")) { scans = scans.filter(s => s.folder !== document.getElementById('folderSelect').value); saveData(); loadScans(); } }
     function saveCheckboxState() { localStorage.setItem('allowDuplicates', document.getElementById('allowDuplicates').checked); }
