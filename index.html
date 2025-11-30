@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Barkod Master v18 (Rules)</title>
+    <title>Barkod Master v19 (Detail Notify)</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
@@ -12,7 +12,7 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
-        /* CSS: Temel Yapı Aynı, Yeni Modal Stilleri Eklendi */
+        /* CSS AYNI - Değişmedi */
         :root { --bg-color: #f0f2f5; --card-bg: #ffffff; --text-color: #333333; --border-color: #eeeeee; --item-bg-odd: #fafafa; --highlight: #007bff; }
         [data-theme="dark"] { --bg-color: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --border-color: #333333; --item-bg-odd: #252525; --highlight: #4dabf7; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; background: var(--bg-color); color: var(--text-color); transition: 0.3s; user-select: none; }
@@ -21,7 +21,7 @@
         h2 { margin: 0; font-size: 1.4em; }
         .header-buttons { display: flex; gap: 10px; }
         .theme-toggle, .settings-toggle, .rules-toggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 20px; cursor: pointer; font-size: 1.2em; }
-        .rules-toggle { border-color: #6610f2; color: #6610f2; } /* Kurallar butonu mor */
+        .rules-toggle { border-color: #6610f2; color: #6610f2; }
 
         .controls { margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
         select, input { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
@@ -56,7 +56,7 @@
         .save-modal { margin-top: 5px; background: #28a745; width: 100%; }
         .config-btn { background: #6c757d; font-size: 0.9em; padding: 8px; margin-top: 5px; }
 
-        /* Kural Listesi Stilleri */
+        /* Kural Listesi */
         #rulesList { list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; }
         #rulesList li { padding: 10px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--item-bg-odd); font-size: 0.9em; }
         .rule-desc { display: flex; flex-direction: column; }
@@ -93,32 +93,18 @@
 
 <div id="rulesModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">
-            <h3 style="margin:0">📏 İsimlendirme Kuralları</h3>
-            <span onclick="closeModal('rulesModal')" style="cursor:pointer; font-size:1.5em;">&times;</span>
-        </div>
-        
+        <div class="modal-header"><h3 style="margin:0">📏 Kurallar</h3><span onclick="closeModal('rulesModal')" style="cursor:pointer; font-size:1.5em;">&times;</span></div>
         <div class="modal-section">
-            <p style="font-size:0.85em; opacity:0.8;">Eğer barkod şarta uyuyorsa, otomatik olarak belirlediğiniz model adını atar.</p>
-            
             <div class="row" style="gap:5px;">
-                <select id="ruleType" style="flex:1;">
-                    <option value="starts">Başlangıç (Starts)</option>
-                    <option value="includes">İçerir (Contains)</option>
-                    <option value="ends">Bitiş (Ends)</option>
-                </select>
+                <select id="ruleType" style="flex:1;"><option value="starts">Başlangıç</option><option value="includes">İçerir</option><option value="ends">Bitiş</option></select>
                 <input type="text" id="ruleValue" placeholder="Örn: 869" style="flex:1;">
             </div>
             <div class="row">
-                <input type="text" id="ruleModelName" placeholder="Model Adı (Örn: Türkiye Ürünü)" style="flex:2;">
+                <input type="text" id="ruleModelName" placeholder="Model Adı" style="flex:2;">
                 <button onclick="addRule()" style="flex:1; background:#28a745;">+ Ekle</button>
             </div>
         </div>
-
-        <div class="modal-section">
-            <h4>Mevcut Kurallar</h4>
-            <ul id="rulesList"></ul>
-        </div>
+        <div class="modal-section"><h4>Liste</h4><ul id="rulesList"></ul></div>
     </div>
 </div>
 
@@ -159,7 +145,7 @@
             <div class="menu-grid">
                 <button onclick="uploadReportToGist()" class="menu-btn" style="background:#fd7e14">☁️ Gist</button>
                 <button onclick="uploadReportToCustomApi()" class="menu-btn" style="background:#d63384">📡 API</button>
-                <button onclick="sendToGoogle('report')" class="menu-btn full-width" style="background:#198754">📊 Google Sheets</button>
+                <button onclick="sendToGoogle('report')" class="menu-btn full-width" style="background:#198754">📊 Sheets</button>
             </div>
         </div>
     </div>
@@ -195,7 +181,7 @@
 
 <div class="container">
     <div class="header">
-        <h2>📦 Barkod Master <small>v18</small></h2>
+        <h2>📦 Barkod Master <small>v19</small></h2>
         <div class="header-buttons">
             <button class="rules-toggle" onclick="openRulesModal()" title="Kurallar">📏</button>
             <button class="settings-toggle" onclick="openSettings()" title="Ayarlar">⚙️</button>
@@ -245,7 +231,7 @@
     let folders = JSON.parse(localStorage.getItem('folders')) || ['Genel'];
     let scans = JSON.parse(localStorage.getItem('scans')) || []; 
     let productNames = JSON.parse(localStorage.getItem('productNames')) || {}; 
-    let namingRules = JSON.parse(localStorage.getItem('namingRules')) || []; // YENİ: Kurallar dizisi
+    let namingRules = JSON.parse(localStorage.getItem('namingRules')) || [];
 
     let gistToken = localStorage.getItem('gistToken') || '';
     let gistId = localStorage.getItem('gistId') || '';
@@ -276,28 +262,26 @@
     
     // --- AKILLI İSİM BULUCU ---
     function resolveProductName(code) {
-        // 1. Manuel İsim (En yüksek öncelik)
         if (productNames[code]) return productNames[code];
-
-        // 2. Kural Tabanlı İsim
         for (const rule of namingRules) {
             if (rule.type === 'starts' && code.startsWith(rule.value)) return rule.modelName;
             if (rule.type === 'includes' && code.includes(rule.value)) return rule.modelName;
             if (rule.type === 'ends' && code.endsWith(rule.value)) return rule.modelName;
         }
-
-        // 3. Bulunamadı
         return "";
     }
 
+    // --- İŞLEM FONKSİYONU (GÜNCELLENDİ: Bildirim Detayı) ---
     function processCode(code, quantityToAdd = 1) {
         if (!code) return;
         currentFolder = document.getElementById('folderSelect').value;
         const allowDuplicates = document.getElementById('allowDuplicates').checked;
         const existingIndex = scans.findIndex(s => s.folder === currentFolder && s.code === code);
         
-        // İsmi otomatik bul
-        const displayName = resolveProductName(code) || code;
+        // Model Adını ve Etiketi Hazırla
+        const modelName = resolveProductName(code);
+        // Eğer isim varsa: "Model (Barkod)" formatında, yoksa sadece "Barkod"
+        const displayLabel = modelName ? `${modelName} (${code})` : code;
         
         quantityToAdd = parseInt(quantityToAdd); if(isNaN(quantityToAdd) || quantityToAdd < 1) quantityToAdd = 1;
 
@@ -307,16 +291,20 @@
                 scans[existingIndex].time = new Date().toLocaleString('tr-TR');
                 const updatedItem = scans.splice(existingIndex, 1)[0];
                 scans.unshift(updatedItem);
-                showToast(`📦 Arttı: ${displayName} (+${quantityToAdd})`, "update");
+                
+                // Bildirimde ikisini de göster
+                showToast(`📦 Arttı: ${displayLabel} (+${quantityToAdd})`, "update");
                 playBeep(600);
             } else {
-                showToast(`⚠️ HATA: Zaten var! (${displayName})`, "error");
+                showToast(`⚠️ HATA: Zaten var! (${displayLabel})`, "error");
                 if(navigator.vibrate) navigator.vibrate([100, 50, 100]); return;
             }
         } else {
             const newScan = { folder: currentFolder, code: code, time: new Date().toLocaleString('tr-TR'), qty: quantityToAdd };
             scans.unshift(newScan);
-            showToast(`✅ Eklendi: ${displayName} (x${quantityToAdd})`, "success");
+            
+            // Bildirimde ikisini de göster
+            showToast(`✅ Eklendi: ${displayLabel} (x${quantityToAdd})`, "success");
             playBeep(880);
         }
         saveData(); loadScans();
@@ -336,7 +324,6 @@
     }
     function handleManualEnter(event) { if (event.key === "Enter") addManualCode(); }
     
-    // Manuel İsimlendirme (Override)
     function renameItem(code) {
         const currentName = productNames[code] || "";
         const newName = prompt(`"${code}" için ÖZEL isim giriniz (Kuralı ezer):`, currentName);
@@ -349,36 +336,19 @@
         const type = document.getElementById('ruleType').value;
         const value = document.getElementById('ruleValue').value.trim();
         const modelName = document.getElementById('ruleModelName').value.trim();
-        
-        if(!value || !modelName) { alert("Lütfen değer ve model adı girin."); return; }
-        
+        if(!value || !modelName) { alert("Değer ve Model Adı girin."); return; }
         namingRules.push({ type, value, modelName });
-        saveData();
-        renderRules();
-        document.getElementById('ruleValue').value = '';
-        document.getElementById('ruleModelName').value = '';
-        showToast("Kural Eklendi", "success");
-        loadScans(); // Listeyi güncelle ki yeni kurallar uygulansın
+        saveData(); renderRules();
+        document.getElementById('ruleValue').value = ''; document.getElementById('ruleModelName').value = '';
+        showToast("Kural Eklendi", "success"); loadScans();
     }
-    function deleteRule(index) {
-        namingRules.splice(index, 1);
-        saveData();
-        renderRules();
-        loadScans();
-    }
+    function deleteRule(index) { namingRules.splice(index, 1); saveData(); renderRules(); loadScans(); }
     function renderRules() {
-        const list = document.getElementById('rulesList');
-        list.innerHTML = '';
+        const list = document.getElementById('rulesList'); list.innerHTML = '';
         namingRules.forEach((rule, index) => {
             const typeText = rule.type === 'starts' ? 'Başlangıç' : (rule.type === 'includes' ? 'İçerir' : 'Bitiş');
             const li = document.createElement('li');
-            li.innerHTML = `
-                <div class="rule-desc">
-                    <span class="rule-tag">${typeText}: "${rule.value}"</span>
-                    <strong style="margin-top:2px;">➝ ${rule.modelName}</strong>
-                </div>
-                <button onclick="deleteRule(${index})" class="btn-rule-del">Sil</button>
-            `;
+            li.innerHTML = `<div class="rule-desc"><span class="rule-tag">${typeText}: "${rule.value}"</span><strong style="margin-top:2px;">➝ ${rule.modelName}</strong></div><button onclick="deleteRule(${index})" class="btn-rule-del">Sil</button>`;
             list.appendChild(li);
         });
     }
@@ -387,18 +357,13 @@
     function openModal(id) { document.getElementById(id).style.display = "flex"; }
     function closeModal(id) { document.getElementById(id).style.display = "none"; }
     function openSettings() {
-        document.getElementById('setGistToken').value = gistToken;
-        document.getElementById('setGistId').value = gistId;
-        document.getElementById('setDriveUrl').value = driveUrl;
-        document.getElementById('setDriveSecret').value = driveSecret;
-        document.getElementById('setApiUrl').value = customApiUrl;
-        openModal('settingsModal');
+        document.getElementById('setGistToken').value = gistToken; document.getElementById('setGistId').value = gistId;
+        document.getElementById('setDriveUrl').value = driveUrl; document.getElementById('setDriveSecret').value = driveSecret;
+        document.getElementById('setApiUrl').value = customApiUrl; openModal('settingsModal');
     }
     function saveAllSettings() {
-        gistToken = document.getElementById('setGistToken').value.trim();
-        driveUrl = document.getElementById('setDriveUrl').value.trim();
-        driveSecret = document.getElementById('setDriveSecret').value.trim();
-        customApiUrl = document.getElementById('setApiUrl').value.trim();
+        gistToken = document.getElementById('setGistToken').value.trim(); driveUrl = document.getElementById('setDriveUrl').value.trim();
+        driveSecret = document.getElementById('setDriveSecret').value.trim(); customApiUrl = document.getElementById('setApiUrl').value.trim();
         localStorage.setItem('gistToken', gistToken); localStorage.setItem('driveUrl', driveUrl);
         localStorage.setItem('driveSecret', driveSecret); localStorage.setItem('customApiUrl', customApiUrl);
         showToast("Ayarlar Kaydedildi!", "success"); closeModal('settingsModal');
@@ -414,16 +379,12 @@
         reader.onload = e => {
             try {
                 const config = JSON.parse(e.target.result);
-                if(config.gistToken) gistToken = config.gistToken;
-                if(config.driveUrl) driveUrl = config.driveUrl;
-                if(config.driveSecret) driveSecret = config.driveSecret;
-                if(config.customApiUrl) customApiUrl = config.customApiUrl;
-                if(config.namingRules) namingRules = config.namingRules; // Kuralları da al
-                saveAllSettings(); saveData(); renderRules();
-                alert("Ayarlar ve Kurallar Yüklendi!");
+                if(config.gistToken) gistToken = config.gistToken; if(config.driveUrl) driveUrl = config.driveUrl;
+                if(config.driveSecret) driveSecret = config.driveSecret; if(config.customApiUrl) customApiUrl = config.customApiUrl;
+                if(config.namingRules) namingRules = config.namingRules; 
+                saveAllSettings(); saveData(); renderRules(); alert("Yüklendi!");
             } catch(err) { alert("Dosya hatalı!"); }
-        };
-        reader.readAsText(file);
+        }; reader.readAsText(file);
     }
 
     // --- CLOUD ---
