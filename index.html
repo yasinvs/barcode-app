@@ -1,439 +1,1008 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Barkod Master v21 (Reset)</title>
-    
+    <title>Barkod Master v23 (Polished)</title>
+
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    
+
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
-        /* CSS AYNI - Değişmedi */
-        :root { --bg-color: #f0f2f5; --card-bg: #ffffff; --text-color: #333333; --border-color: #eeeeee; --item-bg-odd: #fafafa; --highlight: #007bff; }
-        [data-theme="dark"] { --bg-color: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --border-color: #333333; --item-bg-odd: #252525; --highlight: #4dabf7; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; background: var(--bg-color); color: var(--text-color); transition: 0.3s; user-select: none; }
-        .container { max-width: 600px; margin: 0 auto; background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        h2 { margin: 0; font-size: 1.4em; }
-        .header-buttons { display: flex; gap: 10px; }
-        .theme-toggle, .settings-toggle, .rules-toggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 20px; cursor: pointer; font-size: 1.2em; }
-        .rules-toggle { border-color: #6610f2; color: #6610f2; }
-        .controls { margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
-        select, input { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
-        .row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .checkbox-container { display: flex; align-items: center; margin-bottom: 10px; padding: 10px; background: var(--item-bg-odd); border-radius: 8px; border: 1px solid var(--border-color); }
-        .checkbox-container input { width: 20px; height: 20px; margin-right: 10px; cursor: pointer; }
-        .checkbox-container label { font-weight: bold; cursor: pointer; flex: 1; }
-        button { padding: 12px; background: var(--highlight); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 1; font-size: 14px; }
-        button:active { transform: scale(0.98); }
-        button.delete-folder { background: #dc3545; flex: 0.3; }
-        button.clear-list { background: #ffc107; color: black; flex: 0.3; }
-        button.btn-manual { background: #6610f2; flex: 0.4; }
-        .main-menu-btn { padding: 15px; font-size: 1.1em; margin-bottom: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-backup-menu { background: #0d6efd; }
-        .btn-report-menu { background: #198754; }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .full-width { grid-column: span 2; }
-        .menu-btn { padding: 15px; font-size: 0.9em; display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; }
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; overflow-y: auto; }
-        .modal-content { background-color: var(--card-bg); padding: 20px; border-radius: 10px; width: 90%; max-width: 450px; color: var(--text-color); box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-        .modal-section { margin-bottom: 20px; text-align: left; }
-        .modal-section h4 { margin: 0 0 10px 0; color: var(--highlight); font-size: 1em; display: flex; align-items: center; gap: 5px; opacity: 0.8; }
-        .stat-box { background: var(--item-bg-odd); padding: 10px; margin: 10px 0; border-radius: 8px; text-align: center; }
-        .stat-value { font-size: 1.5em; font-weight: bold; color: var(--highlight); }
-        .stat-label { font-size: 0.9em; opacity: 0.8; }
-        .close-modal { margin-top: 15px; background: #dc3545; width: 100%; }
-        .save-modal { margin-top: 5px; background: #28a745; width: 100%; }
-        .config-btn { background: #6c757d; font-size: 0.9em; padding: 8px; margin-top: 5px; }
-        #rulesList { list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; }
-        #rulesList li { padding: 10px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--item-bg-odd); font-size: 0.9em; }
-        .rule-desc { display: flex; flex-direction: column; }
-        .rule-tag { font-size: 0.75em; font-weight: bold; background: #e9ecef; padding: 2px 5px; border-radius: 4px; width: fit-content; color: #495057; }
-        .rule-action-badge { font-size: 0.7em; margin-left: 5px; padding: 2px 4px; border-radius: 3px; color: white; }
-        .badge-assign { background: #0d6efd; }
-        .badge-replace { background: #fd7e14; }
-        .btn-rule-del { background: #dc3545; padding: 5px 10px; font-size: 0.8em; margin: 0; border-radius: 4px; width: auto; flex: none; }
-        #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; background: black; }
-        #searchInput { padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; margin-top: 15px; }
-        #scan-list { list-style: none; padding: 0; max-height: 350px; overflow-y: auto; }
-        #scan-list li { padding: 12px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .item-left { display: flex; align-items: center; gap: 10px; flex: 1; overflow: hidden; }
-        .qty-badge { background: var(--highlight); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.9em; font-weight: bold; min-width: 25px; text-align: center; }
-        .item-info { display: flex; flex-direction: column; overflow: hidden; }
-        .code-text { font-weight: bold; font-size: 1.1em; color: var(--highlight); }
-        .name-text { font-size: 0.95em; color: var(--text-color); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .timestamp { font-size: 0.75em; opacity: 0.6; }
-        .btn-controls { display: flex; gap: 5px; }
-        .btn-small { padding: 5px 10px; font-size: 14px; border-radius: 4px; }
-        .btn-edit { background: #6f42c1; } 
-        .btn-plus { background: var(--highlight); }
-        .btn-minus { background: #ffc107; color: black; }
-        .btn-del { background: #dc3545; }
-        #notification { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 1000; left: 50%; top: 30px; transform: translateX(-50%); opacity: 0; transition: 0.3s; }
-        #notification.show { visibility: visible; opacity: 1; top: 50px; }
-        #notification.success { background-color: #28a745; }
-        #notification.update { background-color: #17a2b8; } 
-        #notification.error { background-color: #dc3545; }
+        /* TEMEL STİLLER */
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #eeeeee;
+            --item-bg-odd: #fafafa;
+            --highlight: #007bff;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #333333;
+            --item-bg-odd: #252525;
+            --highlight: #4dabf7;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 15px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: 0.3s;
+            user-select: none;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 1.3em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn-header {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: 0.2s;
+        }
+
+        .icon-btn-header:active {
+            background: var(--border-color);
+        }
+
+        /* KAMERA (Eski Standart Boyut) */
+        #reader {
+            width: 100%;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: black;
+            border: 1px solid #ccc;
+        }
+
+        /* SCAN SWITCH */
+        .scan-control-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--item-bg-odd);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #28a745;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(24px);
+        }
+
+        .scan-status-text {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* FORMLAR */
+        .controls {
+            margin-bottom: 15px;
+        }
+
+        select,
+        input {
+            padding: 12px;
+            width: 100%;
+            margin-bottom: 10px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: var(--item-bg-odd);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .checkbox-container input {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+
+        .checkbox-container label {
+            font-weight: bold;
+            flex: 1;
+        }
+
+        /* BUTONLAR */
+        button {
+            padding: 12px;
+            background: var(--highlight);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            flex: 1;
+            font-size: 14px;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.delete-folder {
+            background: #dc3545;
+            flex: 0.4;
+        }
+
+        button.clear-list {
+            background: #ffc107;
+            color: black;
+            flex: 0.4;
+        }
+
+        button.btn-manual {
+            background: #6610f2;
+            flex: 0.4;
+        }
+
+        /* ANA MENÜ BUTONLARI */
+        .main-menu-btn {
+            padding: 15px;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-backup-menu {
+            background: #0d6efd;
+        }
+
+        .btn-report-menu {
+            background: #198754;
+        }
+
+        /* LİSTE */
+        #scan-list {
+            list-style: none;
+            padding: 0;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        #scan-list li {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .qty-badge {
+            background: var(--highlight);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: bold;
+            min-width: 25px;
+            text-align: center;
+        }
+
+        .item-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .code-text {
+            font-weight: bold;
+            color: var(--highlight);
+            font-size: 1.1em;
+        }
+
+        .name-text {
+            font-size: 0.95em;
+            opacity: 0.9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .timestamp {
+            font-size: 0.75em;
+            opacity: 0.6;
+        }
+
+        .btn-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+
+        .btn-edit {
+            background: #6f42c1;
+        }
+
+        .btn-plus {
+            background: var(--highlight);
+        }
+
+        .btn-minus {
+            background: #ffc107;
+            color: black;
+        }
+
+        .btn-del {
+            background: #dc3545;
+        }
+
+        /* MODAL GENEL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 450px;
+            color: var(--text-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .menu-btn {
+            padding: 15px;
+            font-size: 0.95em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            text-align: center;
+            color: white;
+            border-radius: 8px;
+            border: none;
+        }
+
+        .close-modal {
+            margin-top: 10px;
+            background: #dc3545;
+            width: 100%;
+        }
+
+        .save-modal {
+            margin-top: 10px;
+            background: #28a745;
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+        }
+
+        /* AYARLAR MODAL DÜZENLEMESİ (CSS FIX) */
+        .settings-group {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: var(--item-bg-odd);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .settings-group h4 {
+            margin: 0 0 10px 0;
+            font-size: 1em;
+            color: var(--highlight);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .settings-input {
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            padding: 10px;
+        }
+
+        .settings-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        #notification {
+            visibility: hidden;
+            min-width: 280px;
+            background-color: #333;
+            color: #fff;
+            border-radius: 50px;
+            padding: 12px 20px;
+            position: fixed;
+            z-index: 9999;
+            /* En üstte dursun */
+            left: 50%;
+            top: 20px;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            /* Yazı sola, X sağa */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #notification.show {
+            visibility: visible;
+            opacity: 1;
+            top: 50px;
+        }
+
+        #notification.success {
+            background-color: #28a745;
+        }
+
+        #notification.update {
+            background-color: #17a2b8;
+        }
+
+        #notification.error {
+            background-color: #dc3545;
+        }
+
+        /* X Butonu Tasarımı */
+        .toast-undo-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+            /* Küçülmesini engeller */
+        }
+
+        /* İstatistik Kutuları */
+        .stat-box {
+            background: var(--item-bg-odd);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--highlight);
+        }
+
+        /* Kural Listesi */
+        #rulesList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #rulesList li {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--item-bg-odd);
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            border-radius: 6px;
+        }
     </style>
 </head>
+
 <body>
 
-<div id="notification">Bildirim</div>
+    <div id="notification">
+        <span id="toastMessage">Mesaj</span>
+        <button id="toastUndoBtn" class="toast-undo-btn">✕</button>
+    </div>
 
-<div id="rulesModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h3 style="margin:0">📏 Akıllı Kurallar</h3><span onclick="closeModal('rulesModal')" style="cursor:pointer; font-size:1.5em;">&times;</span></div>
-        <div class="modal-section">
-            <div class="row" style="gap:5px;">
-                <select id="ruleCondition" style="flex:1;">
-                    <option value="includes">İçerir</option>
-                    <option value="starts">Başlangıç</option>
-                    <option value="ends">Bitiş</option>
-                </select>
-                <input type="text" id="ruleValue" placeholder="Aranan (Örn: 999)" style="flex:1;">
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin:0">⚙️ Sistem Ayarları</h3><span onclick="closeModal('settingsModal')"
+                    style="cursor:pointer; font-size:1.5em;">&times;</span>
             </div>
-            <div class="row" style="gap:5px;">
-                <select id="ruleAction" style="flex:1;">
-                    <option value="replace">🔀 Değiştir</option>
-                    <option value="assign">🏷️ İsim Ata</option>
-                </select>
-                <input type="text" id="ruleResult" placeholder="Yeni Değer" style="flex:1;">
+
+            <div class="settings-group">
+                <h4>☁️ GitHub Gist</h4>
+                <input type="password" id="setGistToken" class="settings-input" placeholder="GitHub Token (ghp_...)">
+                <input type="text" id="setGistId" class="settings-input" placeholder="Gist ID (Otomatik)" readonly
+                    style="background:#ddd; cursor:not-allowed;">
             </div>
-            <button onclick="addRule()" style="background:#28a745; width:100%;">+ Kural Ekle</button>
+
+            <div class="settings-group">
+                <h4>📊 Google Drive & Sheets</h4>
+                <input type="url" id="setDriveUrl" class="settings-input" placeholder="Web App URL (script.google...)">
+                <input type="password" id="setDriveSecret" class="settings-input" placeholder="Secret Key (Şifre)">
+            </div>
+
+            <div class="settings-group">
+                <h4>📡 Özel API</h4>
+                <input type="url" id="setApiUrl" class="settings-input" placeholder="API Endpoint URL">
+            </div>
+
+            <div class="settings-group" style="border-color:#17a2b8;">
+                <h4 style="color:#17a2b8;">🔄 Ayar Transferi (Config)</h4>
+                <div class="settings-row">
+                    <button onclick="exportConfig()" style="background:#6c757d;">📤 İndir</button>
+                    <button onclick="document.getElementById('configInput').click()" style="background:#17a2b8;">📥
+                        Yükle</button>
+                    <input type="file" id="configInput" style="display:none" onchange="importConfig(this)">
+                </div>
+            </div>
+
+            <button class="save-modal" onclick="saveAllSettings()">💾 Tümünü Kaydet</button>
+
+            <div class="settings-group" style="border-color:#dc3545; margin-top:20px; background:#fff5f5;">
+                <h4 style="color:#dc3545;">🚨 Tehlikeli Bölge</h4>
+                <button onclick="hardResetApp()" style="background:#dc3545; width:100%;">⚠️ Uygulamayı Sıfırla</button>
+            </div>
         </div>
-        <div class="modal-section"><h4>Mevcut Kurallar</h4><ul id="rulesList"></ul></div>
     </div>
-</div>
 
-<div id="backupMenuModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h3 style="margin:0">💾 Yedekleme</h3><span onclick="closeModal('backupMenuModal')" style="cursor:pointer; font-size:1.5em;">&times;</span></div>
-        <div class="modal-section"><h4>Yerel</h4><div class="menu-grid"><button onclick="backupData()" class="menu-btn" style="background:#6c757d">📤 İndir</button><button onclick="document.getElementById('restoreInput').click()" class="menu-btn" style="background:#6c757d">📥 Yükle</button><input type="file" id="restoreInput" style="display:none" onchange="restoreData(this)"></div></div>
-        <div class="modal-section"><h4>Bulut</h4><div class="menu-grid"><button onclick="uploadToGist()" class="menu-btn" style="background:#333">☁️ Gist Gönder</button><button onclick="downloadFromGist()" class="menu-btn" style="background:#333">☁️ Gist Çek</button><button onclick="sendToGoogle('backup')" class="menu-btn full-width" style="background:#0d6efd">💾 Drive</button></div></div>
+    <div id="rulesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin:0">📏 Kurallar</h3><span onclick="closeModal('rulesModal')"
+                    style="cursor:pointer; font-size:1.5em;">&times;</span>
+            </div>
+            <div class="settings-group">
+                <div class="row"><select id="ruleCondition" style="flex:1;">
+                        <option value="includes">İçerir</option>
+                        <option value="starts">Başlangıç</option>
+                        <option value="ends">Bitiş</option>
+                    </select><input type="text" id="ruleValue" placeholder="Aranan" style="flex:1;"></div>
+                <div class="row"><select id="ruleAction" style="flex:1;">
+                        <option value="replace">🔀 Değiştir</option>
+                        <option value="assign">🏷️ Ata</option>
+                    </select><input type="text" id="ruleResult" placeholder="Yeni Değer" style="flex:1;"></div><button
+                    onclick="addRule()" style="background:#28a745; width:100%;">+ Ekle</button>
+            </div>
+            <div style="margin-top:10px;">
+                <ul id="rulesList"></ul>
+            </div>
+        </div>
     </div>
-</div>
-
-<div id="reportMenuModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h3 style="margin:0">📊 Raporlama</h3><span onclick="closeModal('reportMenuModal')" style="cursor:pointer; font-size:1.5em;">&times;</span></div>
-        <div class="modal-section"><h4>Yerel</h4><div class="menu-grid"><button onclick="showStats()" class="menu-btn" style="background:#17a2b8">📈 İstatistik</button><button onclick="exportToCSV()" class="menu-btn" style="background:#28a745">📂 Excel</button></div></div>
-        <div class="modal-section"><h4>Bulut</h4><div class="menu-grid"><button onclick="uploadReportToGist()" class="menu-btn" style="background:#fd7e14">☁️ Gist</button><button onclick="uploadReportToCustomApi()" class="menu-btn" style="background:#d63384">📡 API</button><button onclick="sendToGoogle('report')" class="menu-btn full-width" style="background:#198754">📊 Sheets</button></div></div>
+    <div id="backupMenuModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin:0">💾 Yedekleme</h3><span onclick="closeModal('backupMenuModal')"
+                    style="cursor:pointer;">&times;</span>
+            </div>
+            <div class="menu-grid"><button onclick="backupData()" class="menu-btn" style="background:#6c757d">📤
+                    İndir</button><button onclick="document.getElementById('restoreInput').click()" class="menu-btn"
+                    style="background:#6c757d">📥 Yükle</button><button onclick="uploadToGist()" class="menu-btn"
+                    style="background:#333">☁️ Gist Gönder</button><button onclick="downloadFromGist()" class="menu-btn"
+                    style="background:#333">☁️ Gist Çek</button><button onclick="sendToGoogle('backup')"
+                    class="menu-btn full-width" style="background:#0d6efd">💾 Drive'a Yedekle</button><input type="file"
+                    id="restoreInput" style="display:none" onchange="restoreData(this)"></div>
+        </div>
     </div>
-</div>
+    <div id="reportMenuModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin:0">📊 Raporlama</h3><span onclick="closeModal('reportMenuModal')"
+                    style="cursor:pointer;">&times;</span>
+            </div>
+            <div class="menu-grid"><button onclick="showStats()" class="menu-btn" style="background:#17a2b8">📈
+                    İstatistik</button><button onclick="exportToCSV()" class="menu-btn" style="background:#28a745">📂
+                    Excel</button><button onclick="uploadReportToGist()" class="menu-btn" style="background:#fd7e14">☁️
+                    Gist</button><button onclick="uploadReportToCustomApi()" class="menu-btn"
+                    style="background:#d63384">📡 API</button><button onclick="sendToGoogle('report')"
+                    class="menu-btn full-width" style="background:#198754">📊 Sheets'e Yaz</button></div>
+        </div>
+    </div>
+    <div id="statsDetailModal" class="modal">
+        <div class="modal-content">
+            <h3>📊 Analiz</h3>
+            <h4 id="modalFolderName"></h4>
+            <div class="stat-box">
+                <div class="stat-value" id="statUnique">0</div>
+                <div class="stat-label">Çeşit</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">Toplam</div>
+            </div><button class="close-modal" onclick="closeModal('statsDetailModal')">Kapat</button>
+        </div>
+    </div>
 
-<div id="statsDetailModal" class="modal">
-    <div class="modal-content"><h3>📊 Analiz</h3><h4 id="modalFolderName" style="margin:0; opacity:0.7"></h4><div class="stat-box"><div class="stat-value" id="statUnique">0</div><div class="stat-label">Çeşit</div></div><div class="stat-box"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Toplam</div></div><button class="close-modal" onclick="closeModal('statsDetailModal')">Kapat</button></div>
-</div>
+    <div class="container">
+        <div class="header">
+            <h2>📦 v23</h2>
+            <div class="header-buttons">
+                <button class="icon-btn-header" onclick="openModal('backupMenuModal')" title="Yedekleme">💾</button>
+                <button class="icon-btn-header" onclick="openModal('reportMenuModal')" title="Raporlama">📊</button>
+                <button class="icon-btn-header" onclick="openRulesModal()" title="Kurallar">📏</button>
+                <button class="icon-btn-header" onclick="openSettings()" title="Ayarlar">⚙️</button>
+                <button class="icon-btn-header" onclick="toggleTheme()">🌙</button>
+            </div>
+        </div>
 
-<div id="settingsModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h3 style="margin:0">⚙️ Ayarlar</h3><span onclick="closeModal('settingsModal')" style="cursor:pointer; font-size:1.5em;">&times;</span></div>
-        <div class="modal-section"><h4>☁️ GitHub Gist</h4><input type="password" id="setGistToken" placeholder="GitHub Token"><input type="text" id="setGistId" placeholder="Gist ID" readonly style="background:#eee"></div>
-        <div class="modal-section"><h4>📊 Drive / Sheets</h4><input type="url" id="setDriveUrl" placeholder="Web App URL"><input type="password" id="setDriveSecret" placeholder="Secret Key"></div>
-        <div class="modal-section"><h4>📡 API</h4><input type="url" id="setApiUrl" placeholder="API Endpoint"></div>
-        <div class="modal-section" style="border-top:1px solid var(--border-color); padding-top:10px;">
-            <h4>🔄 Config</h4>
+        <div class="scan-control-area">
+            <label class="switch">
+                <input type="checkbox" id="scanToggle" checked onchange="toggleScanStatus()">
+                <span class="slider round"></span>
+            </label>
+            <span id="scanStatusText" class="scan-status-text" style="color:#28a745;">TARAMA AKTİF</span>
+        </div>
+
+        <div id="reader"></div>
+
+        <div class="controls">
             <div class="row">
-                <button onclick="exportConfig()" class="menu-btn" style="background:#6c757d; padding:8px;">📤 İndir</button>
-                <button onclick="document.getElementById('configInput').click()" class="menu-btn" style="background:#17a2b8; padding:8px;">📥 Yükle</button>
-                <input type="file" id="configInput" style="display:none" onchange="importConfig(this)">
+                <select id="folderSelect" onchange="loadScans()"></select>
+                <button onclick="clearList()" class="clear-list">🧹</button>
+                <button onclick="deleteFolder()" class="delete-folder">🗑️</button>
             </div>
-        </div>
-        
-        <div class="modal-section" style="border: 2px solid #dc3545; border-radius: 8px; padding: 10px; margin-top: 15px; background: #fff5f5;">
-            <h4 style="color:#dc3545;">🚨 Tehlikeli Bölge</h4>
-            <p style="font-size:0.8em; color:#dc3545;">Tüm verileri, ayarları ve önbelleği kalıcı olarak siler.</p>
-            <button onclick="hardResetApp()" style="background:#dc3545; width:100%;">⚠️ Uygulamayı Sıfırla</button>
+            <div class="checkbox-container">
+                <input type="checkbox" id="allowDuplicates" onchange="saveCheckboxState()">
+                <label for="allowDuplicates">Yinelenenleri Ekle (Adet Modu)</label>
+            </div>
+            <div class="row">
+                <input type="text" id="newFolderInput" placeholder="Yeni Klasör">
+                <button onclick="addFolder()">+ Klasör</button>
+            </div>
+            <div class="row">
+                <input type="text" id="manualCodeInput" placeholder="Barkod..." style="flex: 2;"
+                    onkeypress="handleManualEnter(event)">
+                <input type="number" id="manualQtyInput" placeholder="Adet" value="1" style="flex: 0.6;"
+                    onkeypress="handleManualEnter(event)">
+                <button onclick="addManualCode()" class="btn-manual">Ekle</button>
+            </div>
+            <input type="text" id="searchInput" placeholder="🔍 Ara..." onkeyup="filterList()">
         </div>
 
-        <button class="save-modal" onclick="saveAllSettings()">💾 Kaydet</button>
-    </div>
-</div>
-
-<div class="container">
-    <div class="header">
-        <h2>📦 Barkod Master <small>v21</small></h2>
-        <div class="header-buttons">
-            <button class="rules-toggle" onclick="openRulesModal()" title="Kurallar">📏</button>
-            <button class="settings-toggle" onclick="openSettings()" title="Ayarlar">⚙️</button>
-            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
-        </div>
-    </div>
-
-    <div class="controls">
-        <div class="row">
-            <select id="folderSelect" onchange="loadScans()"></select>
-            <button onclick="clearList()" class="clear-list">🧹</button>
-            <button onclick="deleteFolder()" class="delete-folder">🗑️</button>
-        </div>
-        <div class="checkbox-container">
-            <input type="checkbox" id="allowDuplicates" onchange="saveCheckboxState()">
-            <label for="allowDuplicates">Yinelenenleri Ekle (Adet Modu)</label>
-        </div>
-        <div class="row">
-            <input type="text" id="newFolderInput" placeholder="Yeni Klasör (Örn: Raf_A)">
-            <button onclick="addFolder()">+ Klasör</button>
-        </div>
+        <h3>Liste (<span id="count">0</span>)</h3>
+        <ul id="scan-list"></ul>
     </div>
 
-    <div id="reader"></div>
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js')); }
 
-    <div class="row" style="margin-top: 10px;">
-        <input type="text" id="manualCodeInput" placeholder="Barkod..." style="flex: 2;" onkeypress="handleManualEnter(event)">
-        <input type="number" id="manualQtyInput" placeholder="Adet" value="1" style="flex: 0.6; min-width: 60px;" onkeypress="handleManualEnter(event)">
-        <button onclick="addManualCode()" class="btn-manual">Ekle</button>
-    </div>
+        let folders = JSON.parse(localStorage.getItem('folders')) || ['Genel'];
+        let scans = JSON.parse(localStorage.getItem('scans')) || [];
+        let productNames = JSON.parse(localStorage.getItem('productNames')) || {};
+        let namingRules = JSON.parse(localStorage.getItem('namingRules')) || [];
 
-    <input type="text" id="searchInput" placeholder="🔍 Listede Ara..." onkeyup="filterList()">
+        let gistToken = localStorage.getItem('gistToken') || ''; let gistId = localStorage.getItem('gistId') || '';
+        let driveUrl = localStorage.getItem('driveUrl') || ''; let driveSecret = localStorage.getItem('driveSecret') || '';
+        let customApiUrl = localStorage.getItem('customApiUrl') || '';
 
-    <div style="margin-top: 15px;">
-        <button onclick="openModal('backupMenuModal')" class="main-menu-btn btn-backup-menu">💾 Yedekleme & Geri Yükleme</button>
-        <button onclick="openModal('reportMenuModal')" class="main-menu-btn btn-report-menu">📊 Raporlama & Entegrasyon</button>
-    </div>
+        let currentFolder = folders[0];
+        let scanCooldown = false;
+        let isScanningEnabled = true;
 
-    <h3>Ürünler (<span id="count">0</span>)</h3>
-    <ul id="scan-list"></ul>
-</div>
+        if (localStorage.getItem('theme') === 'dark') { document.body.setAttribute('data-theme', 'dark'); }
+        const savedCheckbox = localStorage.getItem('allowDuplicates');
+        document.getElementById('allowDuplicates').checked = savedCheckbox !== 'false';
 
-<script>
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js')); }
-
-    let folders = JSON.parse(localStorage.getItem('folders')) || ['Genel'];
-    let scans = JSON.parse(localStorage.getItem('scans')) || []; 
-    let productNames = JSON.parse(localStorage.getItem('productNames')) || {}; 
-    let namingRules = JSON.parse(localStorage.getItem('namingRules')) || [];
-
-    let gistToken = localStorage.getItem('gistToken') || '';
-    let gistId = localStorage.getItem('gistId') || '';
-    let driveUrl = localStorage.getItem('driveUrl') || '';
-    let driveSecret = localStorage.getItem('driveSecret') || '';
-    let customApiUrl = localStorage.getItem('customApiUrl') || '';
-
-    let currentFolder = folders[0];
-    let scanCooldown = false;
-
-    if (localStorage.getItem('theme') === 'dark') { document.body.setAttribute('data-theme', 'dark'); }
-    const savedCheckbox = localStorage.getItem('allowDuplicates');
-    document.getElementById('allowDuplicates').checked = savedCheckbox !== 'false';
-
-    function init() {
-        const select = document.getElementById('folderSelect');
-        select.innerHTML = '';
-        folders.forEach(f => {
-            let opt = document.createElement('option');
-            opt.value = f; opt.innerText = f;
-            if(f === currentFolder) opt.selected = true;
-            select.appendChild(opt);
-        });
-        loadScans();
-    }
-
-    const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250, aspectRatio: 1.0, disableFlip: false }, false);
-    
-    // --- ETL / ISIM ---
-    function transformCode(code) {
-        let newCode = code;
-        for (const rule of namingRules) {
-            if (rule.action === 'replace') {
-                if (rule.condition === 'starts' && newCode.startsWith(rule.value)) newCode = newCode.replace(rule.value, rule.result);
-                else if (rule.condition === 'includes' && newCode.includes(rule.value)) newCode = newCode.replace(rule.value, rule.result);
-                else if (rule.condition === 'ends' && newCode.endsWith(rule.value)) newCode = newCode.replace(rule.value, rule.result);
-            }
+        function init() {
+            const select = document.getElementById('folderSelect');
+            select.innerHTML = '';
+            folders.forEach(f => {
+                let opt = document.createElement('option');
+                opt.value = f; opt.innerText = f;
+                if (f === currentFolder) opt.selected = true;
+                select.appendChild(opt);
+            });
+            loadScans();
         }
-        return newCode;
-    }
-    function resolveProductName(code) {
-        if (productNames[code]) return productNames[code]; 
-        for (const rule of namingRules) {
-            if (rule.action === 'assign') {
-                if (rule.condition === 'starts' && code.startsWith(rule.value)) return rule.result;
-                if (rule.condition === 'includes' && code.includes(rule.value)) return rule.result;
-                if (rule.condition === 'ends' && code.endsWith(rule.value)) return rule.result;
-            }
+
+        // --- KAMERA (STANDART BOYUT GERİ GELDİ) ---
+        const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250, aspectRatio: 1.0, disableFlip: false }, false);
+
+        function toggleScanStatus() {
+            isScanningEnabled = document.getElementById('scanToggle').checked;
+            const statusText = document.getElementById('scanStatusText');
+            if (isScanningEnabled) { statusText.innerText = "TARAMA AKTİF"; statusText.style.color = "#28a745"; }
+            else { statusText.innerText = "TARAMA DURAKLATILDI"; statusText.style.color = "#dc3545"; }
         }
-        return "";
-    }
 
-    function processCode(rawCode, quantityToAdd = 1) {
-        if (!rawCode) return;
-        const code = transformCode(rawCode);
-        currentFolder = document.getElementById('folderSelect').value;
-        const allowDuplicates = document.getElementById('allowDuplicates').checked;
-        const existingIndex = scans.findIndex(s => s.folder === currentFolder && s.code === code);
-        const modelName = resolveProductName(code);
-        const displayLabel = modelName ? `${modelName} (${code})` : code;
-        
-        quantityToAdd = parseInt(quantityToAdd); if(isNaN(quantityToAdd) || quantityToAdd < 1) quantityToAdd = 1;
+        function transformCode(code) {
+            let newCode = code;
+            for (const rule of namingRules) {
+                if (rule.action === 'replace') {
+                    if (rule.condition === 'starts' && newCode.startsWith(rule.value)) newCode = newCode.replace(rule.value, rule.result);
+                    else if (rule.condition === 'includes' && newCode.includes(rule.value)) newCode = newCode.replace(rule.value, rule.result);
+                    else if (rule.condition === 'ends' && newCode.endsWith(rule.value)) newCode = newCode.replace(rule.value, rule.result);
+                }
+            }
+            return newCode;
+        }
+        function resolveProductName(code) {
+            if (productNames[code]) return productNames[code];
+            for (const rule of namingRules) {
+                if (rule.action === 'assign') {
+                    if (rule.condition === 'starts' && code.startsWith(rule.value)) return rule.result;
+                    if (rule.condition === 'includes' && code.includes(rule.value)) return rule.result;
+                    if (rule.condition === 'ends' && code.endsWith(rule.value)) return rule.result;
+                }
+            }
+            return "";
+        }
 
-        if (existingIndex !== -1) {
-            if (allowDuplicates) {
-                scans[existingIndex].qty = (scans[existingIndex].qty || 1) + quantityToAdd;
-                scans[existingIndex].time = new Date().toLocaleString('tr-TR');
-                const updatedItem = scans.splice(existingIndex, 1)[0];
-                scans.unshift(updatedItem);
-                showToast(`📦 Arttı: ${displayLabel} (+${quantityToAdd})`, "update");
-                playBeep(600);
+        // --- İŞLEM ---
+        function processCode(rawCode, quantityToAdd = 1) {
+            if (!rawCode) return;
+
+            const code = transformCode(rawCode);
+            currentFolder = document.getElementById('folderSelect').value;
+            const allowDuplicates = document.getElementById('allowDuplicates').checked;
+            const existingIndex = scans.findIndex(s => s.folder === currentFolder && s.code === code);
+
+            const modelName = resolveProductName(code);
+            const displayLabel = modelName ? `${modelName} (${code})` : code;
+
+            quantityToAdd = parseInt(quantityToAdd); if (isNaN(quantityToAdd) || quantityToAdd < 1) quantityToAdd = 1;
+
+            if (existingIndex !== -1) {
+                if (allowDuplicates) {
+                    scans[existingIndex].qty = (scans[existingIndex].qty || 1) + quantityToAdd;
+                    scans[existingIndex].time = new Date().toLocaleString('tr-TR');
+                    const updatedItem = scans.splice(existingIndex, 1)[0];
+                    scans.unshift(updatedItem);
+
+                    // ÖNEMLİ: 3. Parametre olarak 'code' gönderiyoruz
+                    showToast(`📦 Arttı: ${displayLabel}`, "update", code);
+                    playBeep(600);
+                } else {
+                    // Hata durumunda silme butonu çıkmasın diye 3. parametre yok
+                    showToast(`⚠️ HATA: Zaten var!`, "error");
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); return;
+                }
             } else {
-                showToast(`⚠️ HATA: Zaten var! (${displayLabel})`, "error");
-                if(navigator.vibrate) navigator.vibrate([100, 50, 100]); return;
+                const newScan = { folder: currentFolder, code: code, time: new Date().toLocaleString('tr-TR'), qty: quantityToAdd };
+                scans.unshift(newScan);
+
+                // ÖNEMLİ: 3. Parametre olarak 'code' gönderiyoruz
+                showToast(`✅ Eklendi: ${displayLabel}`, "success", code);
+                playBeep(880);
             }
-        } else {
-            const newScan = { folder: currentFolder, code: code, time: new Date().toLocaleString('tr-TR'), qty: quantityToAdd };
-            scans.unshift(newScan);
-            showToast(`✅ Eklendi: ${displayLabel} (x${quantityToAdd})`, "success");
-            playBeep(880);
+            saveData(); loadScans();
+            if (navigator.vibrate && (existingIndex === -1 || allowDuplicates)) navigator.vibrate(100);
         }
-        saveData(); loadScans();
-        if(navigator.vibrate && (existingIndex === -1 || allowDuplicates)) navigator.vibrate(100);
-    }
 
-    function onScanSuccess(decodedText) {
-        if (scanCooldown) return;
-        scanCooldown = true; setTimeout(() => { scanCooldown = false; }, 1200);
-        processCode(decodedText, 1);
-    }
-    html5QrcodeScanner.render(onScanSuccess);
-    function addManualCode() {
-        const inputCode = document.getElementById('manualCodeInput'); const inputQty = document.getElementById('manualQtyInput');
-        const code = inputCode.value.trim(); const qty = parseInt(inputQty.value) || 1; 
-        if (code) { processCode(code, qty); inputCode.value = ''; inputQty.value = '1'; inputCode.focus(); } else { alert("Barkod yazın."); }
-    }
-    function handleManualEnter(event) { if (event.key === "Enter") addManualCode(); }
-    
-    function renameItem(code) {
-        const currentName = productNames[code] || "";
-        const newName = prompt(`"${code}" için ÖZEL isim giriniz (Kuralı ezer):`, currentName);
-        if (newName !== null) { productNames[code] = newName.trim(); saveData(); loadScans(); }
-    }
-
-    // --- YENİ: HARD RESET ---
-    async function hardResetApp() {
-        if(!confirm("⚠️ DİKKAT! \n\nTüm veriler, ayarlar ve kurallar kalıcı olarak silinecek. \nUygulama ilk haline dönecek.\n\nEmin misiniz?")) return;
-        if(!confirm("Son Kararınız mı? Geri dönüşü yok!")) return;
-        
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        // Service Worker'ları temizle
-        if ('serviceWorker' in navigator) {
-            const registrations = await navigator.serviceWorker.getRegistrations();
-            for(let registration of registrations) { await registration.unregister(); }
+        function onScanSuccess(decodedText) {
+            if (!isScanningEnabled) return;
+            if (scanCooldown) return;
+            scanCooldown = true; setTimeout(() => { scanCooldown = false; }, 1200);
+            processCode(decodedText, 1);
         }
-        // Cache'i temizle
-        if ('caches' in window) {
-            const keys = await caches.keys();
-            for (const key of keys) { await caches.delete(key); }
+        html5QrcodeScanner.render(onScanSuccess);
+
+        // --- HIZLI SİLME (UNDO) ---
+        function quickDelete(codeToDelete) {
+            // O anki klasördeki o barkodu sorgusuz sualsiz sil
+            scans = scans.filter(s => !(s.folder === currentFolder && s.code === codeToDelete));
+            saveData();
+            loadScans();
+
+            // Bildirimi kapat
+            const x = document.getElementById("notification");
+            x.className = x.className.replace("show", "");
+
+            // Geri bildirim (kısa titreşim)
+            if (navigator.vibrate) navigator.vibrate(50);
         }
-        
-        alert("Sıfırlama Tamamlandı. Uygulama yeniden başlatılıyor.");
-        window.location.reload(true);
-    }
 
-    // --- RULES ---
-    function openRulesModal() { renderRules(); openModal('rulesModal'); }
-    function addRule() {
-        const condition = document.getElementById('ruleCondition').value;
-        const value = document.getElementById('ruleValue').value.trim();
-        const action = document.getElementById('ruleAction').value;
-        const result = document.getElementById('ruleResult').value.trim();
-        if(!value || !result) { alert("Tüm alanları doldurun."); return; }
-        namingRules.push({ condition, value, action, result });
-        saveData(); renderRules(); document.getElementById('ruleValue').value = ''; document.getElementById('ruleResult').value = '';
-        showToast("Kural Eklendi", "success"); loadScans();
-    }
-    function deleteRule(index) { namingRules.splice(index, 1); saveData(); renderRules(); loadScans(); }
-    function renderRules() {
-        const list = document.getElementById('rulesList'); list.innerHTML = '';
-        namingRules.forEach((rule, index) => {
-            const condText = rule.condition === 'starts' ? 'Başlangıç' : (rule.condition === 'includes' ? 'İçerir' : 'Bitiş');
-            const actionBadge = rule.action === 'assign' ? '<span class="rule-action-badge badge-assign">İsim Ata</span>' : '<span class="rule-action-badge badge-replace">Değiştir</span>';
-            const li = document.createElement('li');
-            li.innerHTML = `<div class="rule-desc"><span class="rule-tag">${condText}: "${rule.value}"</span><div style="margin-top:4px;">${actionBadge} <strong>➝ ${rule.result}</strong></div></div><button onclick="deleteRule(${index})" class="btn-rule-del">Sil</button>`;
-            list.appendChild(li);
-        });
-    }
+        let toastTimeout;
 
-    // --- MODALS & SETTINGS ---
-    function openModal(id) { document.getElementById(id).style.display = "flex"; }
-    function closeModal(id) { document.getElementById(id).style.display = "none"; }
-    function openSettings() {
-        document.getElementById('setGistToken').value = gistToken; document.getElementById('setGistId').value = gistId;
-        document.getElementById('setDriveUrl').value = driveUrl; document.getElementById('setDriveSecret').value = driveSecret;
-        document.getElementById('setApiUrl').value = customApiUrl; openModal('settingsModal');
-    }
-    function saveAllSettings() {
-        gistToken = document.getElementById('setGistToken').value.trim(); driveUrl = document.getElementById('setDriveUrl').value.trim();
-        driveSecret = document.getElementById('setDriveSecret').value.trim(); customApiUrl = document.getElementById('setApiUrl').value.trim();
-        localStorage.setItem('gistToken', gistToken); localStorage.setItem('driveUrl', driveUrl);
-        localStorage.setItem('driveSecret', driveSecret); localStorage.setItem('customApiUrl', customApiUrl);
-        showToast("Ayarlar Kaydedildi!", "success"); closeModal('settingsModal');
-    }
-    function exportConfig() {
-        const blob = new Blob([JSON.stringify({ gistToken, driveUrl, driveSecret, customApiUrl, namingRules }, null, 2)], {type: "application/json"});
-        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "barkod_config_rules.json"; 
-        document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    }
-    function importConfig(input) {
-        const file = input.files[0]; if(!file) return;
-        const reader = new FileReader();
-        reader.onload = e => {
-            try {
-                const config = JSON.parse(e.target.result);
-                if(config.gistToken) gistToken = config.gistToken; if(config.driveUrl) driveUrl = config.driveUrl;
-                if(config.driveSecret) driveSecret = config.driveSecret; if(config.customApiUrl) customApiUrl = config.customApiUrl;
-                if(config.namingRules) namingRules = config.namingRules; 
-                saveAllSettings(); saveData(); renderRules(); alert("Yüklendi!");
-            } catch(err) { alert("Dosya hatalı!"); }
-        }; reader.readAsText(file);
-    }
+        function showToast(message, type, undoCode = null) {
+            const box = document.getElementById("notification");
+            const msgSpan = document.getElementById("toastMessage"); // Sadece yazı alanı
+            const undoBtn = document.getElementById("toastUndoBtn"); // Sadece buton
 
-    // --- CLOUD ---
-    async function findGistId() { try { const r=await fetch("https://api.github.com/gists",{headers:{"Authorization":`token ${gistToken}`}}); if(!r.ok)return null; const g=await r.json(); const f=g.find(x=>x.files&&x.files["barkod_master_backup.json"]); if(f){gistId=f.id;localStorage.setItem('gistId',gistId);return gistId;} return null; } catch{return null;} }
-    async function uploadToGist() { if(!gistToken){alert("Token!");openSettings();return;} if(!gistId)await findGistId(); showToast("Yedekleniyor...","update"); try{ let url="https://api.github.com/gists";let m="POST";if(gistId){url+="/"+gistId;m="PATCH";} cleanUpProductNames(); const r=await fetch(url,{method:m,headers:{"Authorization":`token ${gistToken}`,"Accept":"application/vnd.github.v3+json","Content-Type":"application/json"},body:JSON.stringify({description:"Barkod Master Backup",public:false,files:{"barkod_master_backup.json":{content:JSON.stringify({folders,scans,productNames,namingRules},null,2)}}})}); if(!r.ok)throw new Error(r.status); const d=await r.json(); gistId=d.id;localStorage.setItem('gistId',gistId); showToast("✅ Yedeklendi!","success"); }catch(e){alert("Hata:"+e.message);} }
-    async function downloadFromGist() { if(!gistToken){alert("Token!");openSettings();return;} if(!gistId){const f=await findGistId();if(!f){alert("Yedek yok.");return;}} showToast("Çekiliyor...","update"); try{ const r=await fetch(`https://api.github.com/gists/${gistId}`,{headers:{"Authorization":`token ${gistToken}`}}); if(!r.ok)throw new Error("Hata"); const d=await r.json(); if(d.files["barkod_master_backup.json"]){ const c=JSON.parse(d.files["barkod_master_backup.json"].content); if(confirm("Veriler ezilecek?")){ folders=c.folders;scans=c.scans;productNames=c.productNames||{};namingRules=c.namingRules||[]; saveData();init();showToast("♻️ Yüklendi!","success");closeModal('backupMenuModal'); } } }catch(e){alert("Hata:"+e.message);} }
-    async function uploadReportToGist() { if(!gistToken){alert("Token!");openSettings();return;} if(!gistId)await findGistId(); showToast("Raporlanıyor...","update"); let csv="\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n"; scans.forEach(r=>{ csv+=`${r.code};${(resolveProductName(r.code)||r.code).replace(/;/g," ")};${r.qty||1};${r.time};${r.folder}\r\n`; }); try{ let url="https://api.github.com/gists";let m="POST";if(gistId){url+="/"+gistId;m="PATCH";} const r=await fetch(url,{method:m,headers:{"Authorization":`token ${gistToken}`,"Content-Type":"application/json"},body:JSON.stringify({description:"Barkod Master",public:false,files:{"Tum_Stok_Raporu.csv":{content:csv}}})}); if(!r.ok)throw new Error(r.status); const d=await r.json(); if(!gistId){gistId=d.id;localStorage.setItem('gistId',gistId);} if(confirm("Rapor İndirilsin mi?"))window.open(d.html_url,"_blank"); }catch(e){alert("Hata:"+e.message);} }
-    async function sendToGoogle(op) { if(!driveUrl||!driveSecret){alert("Ayarlardan Drive girin!");openSettings();return;} showToast("Gönderiliyor...","update"); let csv="Barkod;Urun_Adi;Adet;Tarih;Klasör\n"; scans.forEach(r=>{ csv+=`${r.code};${(resolveProductName(r.code)||r.code).replace(/;/g," ")};${r.qty||1};${r.time};${r.folder}\n`; }); const py={secret:driveSecret,operation:op,csvContent:csv,jsonContent:JSON.stringify({folders,scans,productNames,namingRules},null,2)}; try{ await fetch(driveUrl,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},body:JSON.stringify(py)}); showToast("✅ Gönderildi!","success"); }catch(e){alert("Hata:"+e.message);} }
-    async function uploadReportToCustomApi() { if(!customApiUrl){alert("API URL!");openSettings();return;} showToast("Gönderiliyor...","update"); let csv="\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n"; scans.forEach(r=>{ csv+=`${r.code};${(resolveProductName(r.code)||r.code).replace(/;/g," ")};${r.qty||1};${r.time};${r.folder}\r\n`; }); const py={source:"BarkodMaster",timestamp:new Date().toLocaleString(),filename:"Tum_Stok_Raporu.csv",csvContent:csv}; try{ const r=await fetch(customApiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(py)}); if(r.ok)showToast("✅ İletildi!","success"); else throw new Error(r.status); }catch(e){alert("Hata:"+e.message);} }
+            clearTimeout(toastTimeout);
 
-    // --- STANDART ---
-    function cleanUpProductNames() { const activeCodes = new Set(scans.map(s => s.code)); Object.keys(productNames).forEach(code => { if (!activeCodes.has(code)) delete productNames[code]; }); }
-    function showStats() { currentFolder = document.getElementById('folderSelect').value; const filtered = scans.filter(s => s.folder === currentFolder); document.getElementById('modalFolderName').innerText = currentFolder; document.getElementById('statUnique').innerText = filtered.length; document.getElementById('statTotal').innerText = filtered.reduce((acc, curr) => acc + (curr.qty || 1), 0); openModal('statsDetailModal'); }
-    function clearList() { if(confirm("Temizlensin mi?")) { scans = scans.filter(s => s.folder !== document.getElementById('folderSelect').value); saveData(); loadScans(); } }
-    function saveCheckboxState() { localStorage.setItem('allowDuplicates', document.getElementById('allowDuplicates').checked); }
-    function updateQty(code, change) { const index = scans.findIndex(s => s.folder === currentFolder && s.code === code); if (index !== -1) { scans[index].qty = (scans[index].qty || 1) + change; if (scans[index].qty <= 0) { if(confirm("Silinsin mi?")) scans.splice(index, 1); else scans[index].qty = 1; } saveData(); loadScans(); } }
-    function deleteItem(code) { if(confirm("Silinsin mi?")) { scans = scans.filter(s => !(s.folder === currentFolder && s.code === code)); saveData(); loadScans(); } }
-    function loadScans() {
-        currentFolder = document.getElementById('folderSelect').value;
-        const list = document.getElementById('scan-list'); list.innerHTML = '';
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = scans.filter(s => { const name = (resolveProductName(s.code)||s.code).toLowerCase(); return s.folder === currentFolder && (s.code.toLowerCase().includes(term) || name.includes(term)); });
-        document.getElementById('count').innerText = filtered.length;
-        filtered.forEach(s => {
-            const pName = resolveProductName(s.code); 
-            let li = document.createElement('li');
-            li.innerHTML = `<div class="item-left"><span class="qty-badge">x${s.qty||1}</span><div class="item-info">${pName ? `<span class="name-text">${pName}</span>` : ''}<span class="code-text" style="${pName ? 'font-size:0.85em; opacity:0.8; font-weight:normal;' : ''}">${s.code}</span><span class="timestamp">${s.time}</span></div></div><div class="btn-controls"><button onclick="renameItem('${s.code}')" class="btn-small btn-edit">✎</button><button onclick="updateQty('${s.code}',1)" class="btn-small btn-plus">+</button><button onclick="updateQty('${s.code}',-1)" class="btn-small btn-minus">-</button><button onclick="deleteItem('${s.code}')" class="btn-small btn-del">🗑️</button></div>`;
-            list.appendChild(li);
-        });
-    }
-    function filterList() { loadScans(); }
-    function exportToCSV() { const filtered = scans.filter(s => s.folder === currentFolder); if(filtered.length === 0) { alert("Boş!"); return; } let csv = "data:text/csv;charset=utf-8,\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n"; filtered.forEach(r => { csv += `${r.code};${(resolveProductName(r.code)||r.code).replace(/;/g, " ")};${r.qty||1};${r.time};${r.folder}\r\n`; }); const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `Stok_${currentFolder}.csv`; document.body.appendChild(link); link.click(); document.body.removeChild(link); }
-    function saveData() { cleanUpProductNames(); localStorage.setItem('scans', JSON.stringify(scans)); localStorage.setItem('folders', JSON.stringify(folders)); localStorage.setItem('productNames', JSON.stringify(productNames)); localStorage.setItem('namingRules', JSON.stringify(namingRules)); }
-    function addFolder() { const name = document.getElementById('newFolderInput').value.trim(); if (name && !folders.includes(name)) { folders.push(name); saveData(); currentFolder=name; document.getElementById('newFolderInput').value=''; init(); } }
-    function deleteFolder() { if(confirm("Silinsin mi?")) { folders = folders.filter(f=>f!==document.getElementById('folderSelect').value); scans=scans.filter(s=>s.folder!==currentFolder); if(folders.length===0) folders=['Genel']; currentFolder=folders[0]; saveData(); init(); } }
-    function backupData() { const blob = new Blob([JSON.stringify({folders, scans, productNames, namingRules})], {type: "application/json"}); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Full_Yedek.json"; document.body.appendChild(link); link.click(); document.body.removeChild(link); }
-    function restoreData(input) { const file = input.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = e => { try { const d=JSON.parse(e.target.result); folders=d.folders; scans=d.scans; productNames=d.productNames||{}; namingRules=d.namingRules||[]; saveData(); init(); showToast("Yüklendi!","success"); closeModal('backupMenuModal'); } catch(err){alert("Hata");} }; reader.readAsText(file); }
-    function playBeep(freq) { if(audioCtx.state==='suspended') audioCtx.resume(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.type="square"; o.frequency.value=freq; g.gain.value=0.1; o.start(); setTimeout(()=>o.stop(), 150); }
-    function showToast(msg, type) { const x=document.getElementById("notification"); x.className="show "+type; x.innerText=msg; setTimeout(()=>x.className="", 2000); }
-    function toggleTheme() { if(document.body.getAttribute('data-theme')==='dark') { document.body.removeAttribute('data-theme'); localStorage.setItem('theme','light'); } else { document.body.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); } }
-    window.onclick = function(event) { if (event.target.classList.contains('modal')) event.target.style.display = "none"; }
+            // 1. Sadece yazı alanını güncelle (Kutuyu komple ezme!)
+            msgSpan.innerText = message;
 
-    init();
-</script>
+            // 2. Rengi ayarla
+            box.className = "show " + type;
+
+            // 3. X Butonunu Yönet
+            if (undoCode) {
+                undoBtn.style.display = "flex"; // Göster
+                undoBtn.onclick = function () {
+                    quickDelete(undoCode);
+                };
+            } else {
+                undoBtn.style.display = "none"; // Gizle (Hata mesajlarında vs.)
+            }
+
+            // 4. Kapanma sayacı
+            toastTimeout = setTimeout(function () {
+                box.className = box.className.replace("show", "");
+            }, 3000);
+        }
+
+        function addManualCode() {
+            const inputCode = document.getElementById('manualCodeInput'); const inputQty = document.getElementById('manualQtyInput');
+            const code = inputCode.value.trim(); const qty = parseInt(inputQty.value) || 1;
+            if (code) { processCode(code, qty); inputCode.value = ''; inputQty.value = '1'; inputCode.focus(); } else { alert("Barkod yazın."); }
+        }
+        function handleManualEnter(event) { if (event.key === "Enter") addManualCode(); }
+        function renameItem(code) {
+            const currentName = productNames[code] || "";
+            const newName = prompt(`"${code}" için ÖZEL isim giriniz:`, currentName);
+            if (newName !== null) { productNames[code] = newName.trim(); saveData(); loadScans(); }
+        }
+
+        // --- MODALS & SETTINGS ---
+        function openModal(id) { document.getElementById(id).style.display = "flex"; }
+        function closeModal(id) { document.getElementById(id).style.display = "none"; }
+        function openSettings() {
+            document.getElementById('setGistToken').value = gistToken; document.getElementById('setGistId').value = gistId;
+            document.getElementById('setDriveUrl').value = driveUrl; document.getElementById('setDriveSecret').value = driveSecret;
+            document.getElementById('setApiUrl').value = customApiUrl; openModal('settingsModal');
+        }
+        function saveAllSettings() {
+            gistToken = document.getElementById('setGistToken').value.trim(); driveUrl = document.getElementById('setDriveUrl').value.trim();
+            driveSecret = document.getElementById('setDriveSecret').value.trim(); customApiUrl = document.getElementById('setApiUrl').value.trim();
+            localStorage.setItem('gistToken', gistToken); localStorage.setItem('driveUrl', driveUrl);
+            localStorage.setItem('driveSecret', driveSecret); localStorage.setItem('customApiUrl', customApiUrl);
+            showToast("Ayarlar Kaydedildi!", "success"); closeModal('settingsModal');
+        }
+        function exportConfig() {
+            const blob = new Blob([JSON.stringify({ gistToken, driveUrl, driveSecret, customApiUrl, namingRules }, null, 2)], { type: "application/json" });
+            const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "barkod_config.json";
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+        function importConfig(input) {
+            const file = input.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const c = JSON.parse(e.target.result);
+                    if (c.gistToken) gistToken = c.gistToken; if (c.driveUrl) driveUrl = c.driveUrl;
+                    if (c.driveSecret) driveSecret = c.driveSecret; if (c.customApiUrl) customApiUrl = c.customApiUrl;
+                    if (c.namingRules) namingRules = c.namingRules;
+                    saveAllSettings(); saveData(); renderRules(); alert("Yüklendi!");
+                } catch (err) { alert("Hata!"); }
+            }; reader.readAsText(file);
+        }
+
+        async function hardResetApp() {
+            if (!confirm("⚠️ DİKKAT! \n\nTüm veriler, ayarlar ve kurallar kalıcı olarak silinecek. \nUygulama ilk haline dönecek.\n\nEmin misiniz?")) return;
+            if (!confirm("Son Kararınız mı? Geri dönüşü yok!")) return;
+
+            localStorage.clear();
+            sessionStorage.clear();
+
+            // Service Worker'ları temizle
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) { await registration.unregister(); }
+            }
+            // Cache'i temizle
+            if ('caches' in window) {
+                const keys = await caches.keys();
+                for (const key of keys) { await caches.delete(key); }
+            }
+
+            alert("Sıfırlama Tamamlandı. Uygulama yeniden başlatılıyor.");
+            window.location.reload(true);
+        }
+
+        // --- RULES ---
+        function openRulesModal() { renderRules(); openModal('rulesModal'); }
+        function addRule() {
+            const condition = document.getElementById('ruleCondition').value; const value = document.getElementById('ruleValue').value.trim();
+            const action = document.getElementById('ruleAction').value; const result = document.getElementById('ruleResult').value.trim();
+            if (!value || !result) { alert("Doldurun."); return; }
+            namingRules.push({ condition, value, action, result });
+            saveData(); renderRules(); document.getElementById('ruleValue').value = ''; document.getElementById('ruleResult').value = '';
+            showToast("Kural Eklendi", "success"); loadScans();
+        }
+        function deleteRule(i) { namingRules.splice(i, 1); saveData(); renderRules(); loadScans(); }
+        function renderRules() {
+            const list = document.getElementById('rulesList'); list.innerHTML = '';
+            namingRules.forEach((r, i) => {
+                const cT = r.condition === 'starts' ? 'Başlangıç' : (r.condition === 'includes' ? 'İçerir' : 'Bitiş');
+                const aB = r.action === 'assign' ? '<span style="background:#0d6efd;color:white;padding:2px 4px;border-radius:3px;font-size:0.7em;">Ata</span>' : '<span style="background:#fd7e14;color:white;padding:2px 4px;border-radius:3px;font-size:0.7em;">Değiştir</span>';
+                const li = document.createElement('li'); li.innerHTML = `<div class="rule-desc"><span class="rule-tag">${cT}: "${r.value}"</span><div style="margin-top:4px;">${aB} <strong>➝ ${r.result}</strong></div></div><button onclick="deleteRule(${i})" class="btn-rule-del">Sil</button>`; list.appendChild(li);
+            });
+        }
+
+        // --- CLOUD & UTILS (AYNI) ---
+        async function findGistId() { try { const r = await fetch("https://api.github.com/gists", { headers: { "Authorization": `token ${gistToken}` } }); if (!r.ok) return null; const g = await r.json(); const f = g.find(x => x.files && x.files["barkod_master_backup.json"]); if (f) { gistId = f.id; localStorage.setItem('gistId', gistId); return gistId; } return null; } catch { return null; } }
+        async function uploadToGist() { if (!gistToken) { alert("Token!"); openSettings(); return; } if (!gistId) await findGistId(); showToast("Yedekleniyor...", "update"); try { let url = "https://api.github.com/gists"; let m = "POST"; if (gistId) { url += "/" + gistId; m = "PATCH"; } cleanUpProductNames(); const r = await fetch(url, { method: m, headers: { "Authorization": `token ${gistToken}`, "Accept": "application/vnd.github.v3+json", "Content-Type": "application/json" }, body: JSON.stringify({ description: "Barkod Master Backup", public: false, files: { "barkod_master_backup.json": { content: JSON.stringify({ folders, scans, productNames, namingRules }, null, 2) } } }) }); if (!r.ok) throw new Error(r.status); const d = await r.json(); gistId = d.id; localStorage.setItem('gistId', gistId); showToast("✅ Yedeklendi!", "success"); } catch (e) { alert(e.message); } }
+        async function downloadFromGist() { if (!gistToken) { alert("Token!"); openSettings(); return; } if (!gistId) { const f = await findGistId(); if (!f) { alert("Yedek yok."); return; } } showToast("Çekiliyor...", "update"); try { const r = await fetch(`https://api.github.com/gists/${gistId}`, { headers: { "Authorization": `token ${gistToken}` } }); if (!r.ok) throw new Error("Hata"); const d = await r.json(); if (d.files["barkod_master_backup.json"]) { const c = JSON.parse(d.files["barkod_master_backup.json"].content); if (confirm("Veriler ezilecek?")) { folders = c.folders; scans = c.scans; productNames = c.productNames || {}; namingRules = c.namingRules || []; saveData(); init(); showToast("♻️ Yüklendi!", "success"); closeModal('backupMenuModal'); } } } catch (e) { alert(e.message); } }
+        async function uploadReportToGist() { if (!gistToken) { alert("Token!"); openSettings(); return; } if (!gistId) await findGistId(); showToast("Raporlanıyor...", "update"); let csv = "\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n"; scans.forEach(r => { csv += `${r.code};${(resolveProductName(r.code) || r.code).replace(/;/g, " ")};${r.qty || 1};${r.time};${r.folder}\r\n`; }); try { let url = "https://api.github.com/gists"; let m = "POST"; if (gistId) { url += "/" + gistId; m = "PATCH"; } const r = await fetch(url, { method: m, headers: { "Authorization": `token ${gistToken}`, "Content-Type": "application/json" }, body: JSON.stringify({ description: "Barkod Master", public: false, files: { "Tum_Stok_Raporu.csv": { content: csv } } }) }); if (!r.ok) throw new Error(r.status); const d = await r.json(); if (!gistId) { gistId = d.id; localStorage.setItem('gistId', gistId); } if (confirm("İndir?")) window.open(d.html_url, "_blank"); } catch (e) { alert(e.message); } }
+        async function sendToGoogle(op) { if (!driveUrl || !driveSecret) { alert("Ayarlar!"); openSettings(); return; } showToast("Gönderiliyor...", "update"); let csv = "Barkod;Urun_Adi;Adet;Tarih;Klasör\n"; scans.forEach(r => { csv += `${r.code};${(resolveProductName(r.code) || r.code).replace(/;/g, " ")};${r.qty || 1};${r.time};${r.folder}\n`; }); const py = { secret: driveSecret, operation: op, csvContent: csv, jsonContent: JSON.stringify({ folders, scans, productNames, namingRules }, null, 2) }; try { await fetch(driveUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(py) }); showToast("✅ Gönderildi!", "success"); } catch (e) { alert(e.message); } }
+        async function uploadReportToCustomApi() { if (!customApiUrl) { alert("API!"); openSettings(); return; } showToast("Gönderiliyor...", "update"); let csv = "\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n"; scans.forEach(r => { csv += `${r.code};${(resolveProductName(r.code) || r.code).replace(/;/g, " ")};${r.qty || 1};${r.time};${r.folder}\r\n`; }); const py = { source: "BarkodMaster", timestamp: new Date().toLocaleString(), filename: "Tum_Stok_Raporu.csv", csvContent: csv }; try { const r = await fetch(customApiUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(py) }); if (r.ok) showToast("✅ İletildi!", "success"); else throw new Error(r.status); } catch (e) { alert(e.message); } }
+
+        function cleanUpProductNames() { const activeCodes = new Set(scans.map(s => s.code)); Object.keys(productNames).forEach(code => { if (!activeCodes.has(code)) delete productNames[code]; }); }
+        function showStats() { currentFolder = document.getElementById('folderSelect').value; const filtered = scans.filter(s => s.folder === currentFolder); document.getElementById('modalFolderName').innerText = currentFolder; document.getElementById('statUnique').innerText = filtered.length; document.getElementById('statTotal').innerText = filtered.reduce((acc, curr) => acc + (curr.qty || 1), 0); openModal('statsDetailModal'); }
+        function clearList() { if (confirm("Temizlensin mi?")) { scans = scans.filter(s => s.folder !== document.getElementById('folderSelect').value); saveData(); loadScans(); } }
+        function saveCheckboxState() { localStorage.setItem('allowDuplicates', document.getElementById('allowDuplicates').checked); }
+        function updateQty(code, change) { const index = scans.findIndex(s => s.folder === currentFolder && s.code === code); if (index !== -1) { scans[index].qty = (scans[index].qty || 1) + change; if (scans[index].qty <= 0) { if (confirm("Silinsin mi?")) scans.splice(index, 1); else scans[index].qty = 1; } saveData(); loadScans(); } }
+        function deleteItem(code) { if (confirm("Silinsin mi?")) { scans = scans.filter(s => !(s.folder === currentFolder && s.code === code)); saveData(); loadScans(); } }
+        function loadScans() {
+            currentFolder = document.getElementById('folderSelect').value;
+            const list = document.getElementById('scan-list'); list.innerHTML = '';
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = scans.filter(s => { const name = (resolveProductName(s.code) || s.code).toLowerCase(); return s.folder === currentFolder && (s.code.toLowerCase().includes(term) || name.includes(term)); });
+            document.getElementById('count').innerText = filtered.length;
+            filtered.forEach(s => {
+                const pName = resolveProductName(s.code);
+                let li = document.createElement('li');
+                li.innerHTML = `<div class="item-left"><span class="qty-badge">x${s.qty || 1}</span><div class="item-info">${pName ? `<span class="name-text">${pName}</span>` : ''}<span class="code-text" style="${pName ? 'font-size:0.85em; opacity:0.8; font-weight:normal;' : ''}">${s.code}</span><span class="timestamp">${s.time}</span></div></div><div class="btn-controls"><button onclick="renameItem('${s.code}')" class="btn-small btn-edit">✎</button><button onclick="updateQty('${s.code}',1)" class="btn-small btn-plus">+</button><button onclick="updateQty('${s.code}',-1)" class="btn-small btn-minus">-</button><button onclick="deleteItem('${s.code}')" class="btn-small btn-del">🗑️</button></div>`;
+                list.appendChild(li);
+            });
+        }
+        function filterList() { loadScans(); }
+        function exportToCSV() { const filtered = scans.filter(s => s.folder === currentFolder); if (filtered.length === 0) { alert("Boş!"); return; } let csv = "data:text/csv;charset=utf-8,\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n"; filtered.forEach(r => { csv += `${r.code};${(resolveProductName(r.code) || r.code).replace(/;/g, " ")};${r.qty || 1};${r.time};${r.folder}\r\n`; }); const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `Stok_${currentFolder}.csv`; document.body.appendChild(link); link.click(); document.body.removeChild(link); }
+        function saveData() { cleanUpProductNames(); localStorage.setItem('scans', JSON.stringify(scans)); localStorage.setItem('folders', JSON.stringify(folders)); localStorage.setItem('productNames', JSON.stringify(productNames)); localStorage.setItem('namingRules', JSON.stringify(namingRules)); }
+        function addFolder() { const name = document.getElementById('newFolderInput').value.trim(); if (name && !folders.includes(name)) { folders.push(name); saveData(); currentFolder = name; document.getElementById('newFolderInput').value = ''; init(); } }
+        function deleteFolder() { if (confirm("Silinsin mi?")) { folders = folders.filter(f => f !== document.getElementById('folderSelect').value); scans = scans.filter(s => s.folder !== currentFolder); if (folders.length === 0) folders = ['Genel']; currentFolder = folders[0]; saveData(); init(); } }
+        function backupData() { const blob = new Blob([JSON.stringify({ folders, scans, productNames, namingRules })], { type: "application/json" }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Full_Yedek.json"; document.body.appendChild(link); link.click(); document.body.removeChild(link); }
+        function restoreData(input) { const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = e => { try { const d = JSON.parse(e.target.result); folders = d.folders; scans = d.scans; productNames = d.productNames || {}; namingRules = d.namingRules || []; saveData(); init(); showToast("Yüklendi!", "success"); closeModal('backupMenuModal'); } catch (err) { alert("Hata"); } }; reader.readAsText(file); }
+        function playBeep(freq) { if (audioCtx.state === 'suspended') audioCtx.resume(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.type = "square"; o.frequency.value = freq; g.gain.value = 0.1; o.start(); setTimeout(() => o.stop(), 150); }
+        // function showToast(msg, type) { const x = document.getElementById("notification"); x.className = "show " + type; x.innerText = msg; setTimeout(() => x.className = "", 2000); }
+        function toggleTheme() { if (document.body.getAttribute('data-theme') === 'dark') { document.body.removeAttribute('data-theme'); localStorage.setItem('theme', 'light'); } else { document.body.setAttribute('data-theme', 'dark'); localStorage.setItem('theme', 'dark'); } }
+        window.onclick = function (event) { if (event.target.classList.contains('modal')) event.target.style.display = "none"; }
+
+        init();
+    </script>
 </body>
+
 </html>
