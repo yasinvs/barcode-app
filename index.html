@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Barkod Master v19 (Detail Notify)</title>
+    <title>Barkod Master v20 (Smart ETL)</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
@@ -12,7 +12,7 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
-        /* CSS AYNI - Değişmedi */
+        /* CSS STİLLERİ AYNI - DEĞİŞİKLİK YOK */
         :root { --bg-color: #f0f2f5; --card-bg: #ffffff; --text-color: #333333; --border-color: #eeeeee; --item-bg-odd: #fafafa; --highlight: #007bff; }
         [data-theme="dark"] { --bg-color: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --border-color: #333333; --item-bg-odd: #252525; --highlight: #4dabf7; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; background: var(--bg-color); color: var(--text-color); transition: 0.3s; user-select: none; }
@@ -22,28 +22,23 @@
         .header-buttons { display: flex; gap: 10px; }
         .theme-toggle, .settings-toggle, .rules-toggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 20px; cursor: pointer; font-size: 1.2em; }
         .rules-toggle { border-color: #6610f2; color: #6610f2; }
-
         .controls { margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
         select, input { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; }
         .checkbox-container { display: flex; align-items: center; margin-bottom: 10px; padding: 10px; background: var(--item-bg-odd); border-radius: 8px; border: 1px solid var(--border-color); }
         .checkbox-container input { width: 20px; height: 20px; margin-right: 10px; cursor: pointer; }
         .checkbox-container label { font-weight: bold; cursor: pointer; flex: 1; }
-        
         button { padding: 12px; background: var(--highlight); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 1; font-size: 14px; }
         button:active { transform: scale(0.98); }
         button.delete-folder { background: #dc3545; flex: 0.3; }
         button.clear-list { background: #ffc107; color: black; flex: 0.3; }
         button.btn-manual { background: #6610f2; flex: 0.4; }
-        
         .main-menu-btn { padding: 15px; font-size: 1.1em; margin-bottom: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-backup-menu { background: #0d6efd; }
         .btn-report-menu { background: #198754; }
-
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .full-width { grid-column: span 2; }
         .menu-btn { padding: 15px; font-size: 0.9em; display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; }
-        
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; overflow-y: auto; }
         .modal-content { background-color: var(--card-bg); padding: 20px; border-radius: 10px; width: 90%; max-width: 450px; color: var(--text-color); box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
@@ -55,14 +50,14 @@
         .close-modal { margin-top: 15px; background: #dc3545; width: 100%; }
         .save-modal { margin-top: 5px; background: #28a745; width: 100%; }
         .config-btn { background: #6c757d; font-size: 0.9em; padding: 8px; margin-top: 5px; }
-
-        /* Kural Listesi */
         #rulesList { list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; }
         #rulesList li { padding: 10px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--item-bg-odd); font-size: 0.9em; }
         .rule-desc { display: flex; flex-direction: column; }
         .rule-tag { font-size: 0.75em; font-weight: bold; background: #e9ecef; padding: 2px 5px; border-radius: 4px; width: fit-content; color: #495057; }
+        .rule-action-badge { font-size: 0.7em; margin-left: 5px; padding: 2px 4px; border-radius: 3px; color: white; }
+        .badge-assign { background: #0d6efd; }
+        .badge-replace { background: #fd7e14; }
         .btn-rule-del { background: #dc3545; padding: 5px 10px; font-size: 0.8em; margin: 0; border-radius: 4px; width: auto; flex: none; }
-
         #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; background: black; }
         #searchInput { padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; margin-top: 15px; }
         #scan-list { list-style: none; padding: 0; max-height: 350px; overflow-y: auto; }
@@ -79,7 +74,6 @@
         .btn-plus { background: var(--highlight); }
         .btn-minus { background: #ffc107; color: black; }
         .btn-del { background: #dc3545; }
-        
         #notification { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 1000; left: 50%; top: 30px; transform: translateX(-50%); opacity: 0; transition: 0.3s; }
         #notification.show { visibility: visible; opacity: 1; top: 50px; }
         #notification.success { background-color: #28a745; }
@@ -93,95 +87,62 @@
 
 <div id="rulesModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header"><h3 style="margin:0">📏 Kurallar</h3><span onclick="closeModal('rulesModal')" style="cursor:pointer; font-size:1.5em;">&times;</span></div>
+        <div class="modal-header"><h3 style="margin:0">📏 Akıllı Kurallar</h3><span onclick="closeModal('rulesModal')" style="cursor:pointer; font-size:1.5em;">&times;</span></div>
         <div class="modal-section">
             <div class="row" style="gap:5px;">
-                <select id="ruleType" style="flex:1;"><option value="starts">Başlangıç</option><option value="includes">İçerir</option><option value="ends">Bitiş</option></select>
-                <input type="text" id="ruleValue" placeholder="Örn: 869" style="flex:1;">
+                <select id="ruleCondition" style="flex:1;">
+                    <option value="includes">İçerir</option>
+                    <option value="starts">Başlangıç</option>
+                    <option value="ends">Bitiş</option>
+                </select>
+                <input type="text" id="ruleValue" placeholder="Aranan (Örn: 999)" style="flex:1;">
             </div>
-            <div class="row">
-                <input type="text" id="ruleModelName" placeholder="Model Adı" style="flex:2;">
-                <button onclick="addRule()" style="flex:1; background:#28a745;">+ Ekle</button>
+            
+            <div class="row" style="gap:5px;">
+                <select id="ruleAction" style="flex:1;">
+                    <option value="replace">🔀 Değiştir (Replace)</option>
+                    <option value="assign">🏷️ İsim Ata (Assign)</option>
+                </select>
+                <input type="text" id="ruleResult" placeholder="Yeni Değer (Örn: 888)" style="flex:1;">
             </div>
+
+            <button onclick="addRule()" style="background:#28a745; width:100%;">+ Kural Ekle</button>
         </div>
-        <div class="modal-section"><h4>Liste</h4><ul id="rulesList"></ul></div>
+        <div class="modal-section"><h4>Mevcut Kurallar</h4><ul id="rulesList"></ul></div>
     </div>
 </div>
 
 <div id="backupMenuModal" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h3 style="margin:0">💾 Yedekleme</h3><span onclick="closeModal('backupMenuModal')" style="cursor:pointer; font-size:1.5em;">&times;</span></div>
-        <div class="modal-section">
-            <h4>Yerel</h4>
-            <div class="menu-grid">
-                <button onclick="backupData()" class="menu-btn" style="background:#6c757d">📤 İndir</button>
-                <button onclick="document.getElementById('restoreInput').click()" class="menu-btn" style="background:#6c757d">📥 Yükle</button>
-                <input type="file" id="restoreInput" style="display:none" onchange="restoreData(this)">
-            </div>
-        </div>
-        <div class="modal-section">
-            <h4>Bulut</h4>
-            <div class="menu-grid">
-                <button onclick="uploadToGist()" class="menu-btn" style="background:#333">☁️ Gist Gönder</button>
-                <button onclick="downloadFromGist()" class="menu-btn" style="background:#333">☁️ Gist Çek</button>
-                <button onclick="sendToGoogle('backup')" class="menu-btn full-width" style="background:#0d6efd">💾 Drive</button>
-            </div>
-        </div>
+        <div class="modal-section"><h4>Yerel</h4><div class="menu-grid"><button onclick="backupData()" class="menu-btn" style="background:#6c757d">📤 İndir</button><button onclick="document.getElementById('restoreInput').click()" class="menu-btn" style="background:#6c757d">📥 Yükle</button><input type="file" id="restoreInput" style="display:none" onchange="restoreData(this)"></div></div>
+        <div class="modal-section"><h4>Bulut</h4><div class="menu-grid"><button onclick="uploadToGist()" class="menu-btn" style="background:#333">☁️ Gist Gönder</button><button onclick="downloadFromGist()" class="menu-btn" style="background:#333">☁️ Gist Çek</button><button onclick="sendToGoogle('backup')" class="menu-btn full-width" style="background:#0d6efd">💾 Drive</button></div></div>
     </div>
 </div>
-
 <div id="reportMenuModal" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h3 style="margin:0">📊 Raporlama</h3><span onclick="closeModal('reportMenuModal')" style="cursor:pointer; font-size:1.5em;">&times;</span></div>
-        <div class="modal-section">
-            <h4>Yerel</h4>
-            <div class="menu-grid">
-                <button onclick="showStats()" class="menu-btn" style="background:#17a2b8">📈 İstatistik</button>
-                <button onclick="exportToCSV()" class="menu-btn" style="background:#28a745">📂 Excel</button>
-            </div>
-        </div>
-        <div class="modal-section">
-            <h4>Bulut</h4>
-            <div class="menu-grid">
-                <button onclick="uploadReportToGist()" class="menu-btn" style="background:#fd7e14">☁️ Gist</button>
-                <button onclick="uploadReportToCustomApi()" class="menu-btn" style="background:#d63384">📡 API</button>
-                <button onclick="sendToGoogle('report')" class="menu-btn full-width" style="background:#198754">📊 Sheets</button>
-            </div>
-        </div>
+        <div class="modal-section"><h4>Yerel</h4><div class="menu-grid"><button onclick="showStats()" class="menu-btn" style="background:#17a2b8">📈 İstatistik</button><button onclick="exportToCSV()" class="menu-btn" style="background:#28a745">📂 Excel</button></div></div>
+        <div class="modal-section"><h4>Bulut</h4><div class="menu-grid"><button onclick="uploadReportToGist()" class="menu-btn" style="background:#fd7e14">☁️ Gist</button><button onclick="uploadReportToCustomApi()" class="menu-btn" style="background:#d63384">📡 API</button><button onclick="sendToGoogle('report')" class="menu-btn full-width" style="background:#198754">📊 Sheets</button></div></div>
     </div>
 </div>
-
 <div id="statsDetailModal" class="modal">
-    <div class="modal-content">
-        <h3>📊 Klasör Analizi</h3>
-        <h4 id="modalFolderName" style="margin:0; opacity:0.7"></h4>
-        <div class="stat-box"><div class="stat-value" id="statUnique">0</div><div class="stat-label">Çeşit Barkod</div></div>
-        <div class="stat-box"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Toplam Adet</div></div>
-        <button class="close-modal" onclick="closeModal('statsDetailModal')">Kapat</button>
-    </div>
+    <div class="modal-content"><h3>📊 Analiz</h3><h4 id="modalFolderName" style="margin:0; opacity:0.7"></h4><div class="stat-box"><div class="stat-value" id="statUnique">0</div><div class="stat-label">Çeşit</div></div><div class="stat-box"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Toplam</div></div><button class="close-modal" onclick="closeModal('statsDetailModal')">Kapat</button></div>
 </div>
-
 <div id="settingsModal" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h3 style="margin:0">⚙️ Ayarlar</h3><span onclick="closeModal('settingsModal')" style="cursor:pointer; font-size:1.5em;">&times;</span></div>
         <div class="modal-section"><h4>☁️ GitHub Gist</h4><input type="password" id="setGistToken" placeholder="GitHub Token"><input type="text" id="setGistId" placeholder="Gist ID" readonly style="background:#eee"></div>
         <div class="modal-section"><h4>📊 Drive / Sheets</h4><input type="url" id="setDriveUrl" placeholder="Web App URL"><input type="password" id="setDriveSecret" placeholder="Secret Key"></div>
         <div class="modal-section"><h4>📡 API</h4><input type="url" id="setApiUrl" placeholder="API Endpoint"></div>
-        <div class="modal-section" style="border-top:1px solid var(--border-color); padding-top:10px;">
-            <h4>🔄 Config</h4>
-            <div class="row">
-                <button onclick="exportConfig()" class="menu-btn" style="background:#6c757d; padding:8px;">📤 İndir</button>
-                <button onclick="document.getElementById('configInput').click()" class="menu-btn" style="background:#17a2b8; padding:8px;">📥 Yükle</button>
-                <input type="file" id="configInput" style="display:none" onchange="importConfig(this)">
-            </div>
-        </div>
+        <div class="modal-section" style="border-top:1px solid var(--border-color); padding-top:10px;"><h4>🔄 Config</h4><div class="row"><button onclick="exportConfig()" class="menu-btn" style="background:#6c757d; padding:8px;">📤 İndir</button><button onclick="document.getElementById('configInput').click()" class="menu-btn" style="background:#17a2b8; padding:8px;">📥 Yükle</button><input type="file" id="configInput" style="display:none" onchange="importConfig(this)"></div></div>
         <button class="save-modal" onclick="saveAllSettings()">💾 Kaydet</button>
     </div>
 </div>
 
 <div class="container">
     <div class="header">
-        <h2>📦 Barkod Master <small>v19</small></h2>
+        <h2>📦 Barkod Master <small>v20</small></h2>
         <div class="header-buttons">
             <button class="rules-toggle" onclick="openRulesModal()" title="Kurallar">📏</button>
             <button class="settings-toggle" onclick="openSettings()" title="Ayarlar">⚙️</button>
@@ -260,27 +221,51 @@
 
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250, aspectRatio: 1.0, disableFlip: false }, false);
     
-    // --- AKILLI İSİM BULUCU ---
-    function resolveProductName(code) {
-        if (productNames[code]) return productNames[code];
+    // --- 1. ADIM: BARKODU DEĞİŞTİR (ETL) ---
+    function transformCode(code) {
+        let newCode = code;
         for (const rule of namingRules) {
-            if (rule.type === 'starts' && code.startsWith(rule.value)) return rule.modelName;
-            if (rule.type === 'includes' && code.includes(rule.value)) return rule.modelName;
-            if (rule.type === 'ends' && code.endsWith(rule.value)) return rule.modelName;
+            // Sadece 'replace' (Değiştir) aksiyonlarını uygula
+            if (rule.action === 'replace') {
+                if (rule.condition === 'starts' && newCode.startsWith(rule.value)) {
+                    newCode = newCode.replace(rule.value, rule.result);
+                } else if (rule.condition === 'includes' && newCode.includes(rule.value)) {
+                    newCode = newCode.replace(rule.value, rule.result);
+                } else if (rule.condition === 'ends' && newCode.endsWith(rule.value)) {
+                    newCode = newCode.replace(rule.value, rule.result);
+                }
+            }
+        }
+        return newCode;
+    }
+
+    // --- 2. ADIM: İSİM BUL (LABELING) ---
+    function resolveProductName(code) {
+        if (productNames[code]) return productNames[code]; // Manuel isim
+        for (const rule of namingRules) {
+            // Sadece 'assign' (İsim Ata) aksiyonlarını uygula
+            if (rule.action === 'assign') {
+                if (rule.condition === 'starts' && code.startsWith(rule.value)) return rule.result;
+                if (rule.condition === 'includes' && code.includes(rule.value)) return rule.result;
+                if (rule.condition === 'ends' && code.endsWith(rule.value)) return rule.result;
+            }
         }
         return "";
     }
 
-    // --- İŞLEM FONKSİYONU (GÜNCELLENDİ: Bildirim Detayı) ---
-    function processCode(code, quantityToAdd = 1) {
-        if (!code) return;
+    // --- İŞLEM FONKSİYONU ---
+    function processCode(rawCode, quantityToAdd = 1) {
+        if (!rawCode) return;
+        
+        // ÖNCE DÖNÜŞTÜR (Replace Kuralları)
+        const code = transformCode(rawCode);
+
         currentFolder = document.getElementById('folderSelect').value;
         const allowDuplicates = document.getElementById('allowDuplicates').checked;
         const existingIndex = scans.findIndex(s => s.folder === currentFolder && s.code === code);
         
-        // Model Adını ve Etiketi Hazırla
+        // SONRA İSMİ BUL (Assign Kuralları)
         const modelName = resolveProductName(code);
-        // Eğer isim varsa: "Model (Barkod)" formatında, yoksa sadece "Barkod"
         const displayLabel = modelName ? `${modelName} (${code})` : code;
         
         quantityToAdd = parseInt(quantityToAdd); if(isNaN(quantityToAdd) || quantityToAdd < 1) quantityToAdd = 1;
@@ -291,8 +276,6 @@
                 scans[existingIndex].time = new Date().toLocaleString('tr-TR');
                 const updatedItem = scans.splice(existingIndex, 1)[0];
                 scans.unshift(updatedItem);
-                
-                // Bildirimde ikisini de göster
                 showToast(`📦 Arttı: ${displayLabel} (+${quantityToAdd})`, "update");
                 playBeep(600);
             } else {
@@ -302,8 +285,6 @@
         } else {
             const newScan = { folder: currentFolder, code: code, time: new Date().toLocaleString('tr-TR'), qty: quantityToAdd };
             scans.unshift(newScan);
-            
-            // Bildirimde ikisini de göster
             showToast(`✅ Eklendi: ${displayLabel} (x${quantityToAdd})`, "success");
             playBeep(880);
         }
@@ -333,22 +314,35 @@
     // --- KURAL YÖNETİMİ ---
     function openRulesModal() { renderRules(); openModal('rulesModal'); }
     function addRule() {
-        const type = document.getElementById('ruleType').value;
+        const condition = document.getElementById('ruleCondition').value;
         const value = document.getElementById('ruleValue').value.trim();
-        const modelName = document.getElementById('ruleModelName').value.trim();
-        if(!value || !modelName) { alert("Değer ve Model Adı girin."); return; }
-        namingRules.push({ type, value, modelName });
+        const action = document.getElementById('ruleAction').value;
+        const result = document.getElementById('ruleResult').value.trim();
+        
+        if(!value || !result) { alert("Lütfen tüm alanları doldurun."); return; }
+        
+        namingRules.push({ condition, value, action, result });
         saveData(); renderRules();
-        document.getElementById('ruleValue').value = ''; document.getElementById('ruleModelName').value = '';
+        document.getElementById('ruleValue').value = ''; document.getElementById('ruleResult').value = '';
         showToast("Kural Eklendi", "success"); loadScans();
     }
     function deleteRule(index) { namingRules.splice(index, 1); saveData(); renderRules(); loadScans(); }
     function renderRules() {
         const list = document.getElementById('rulesList'); list.innerHTML = '';
         namingRules.forEach((rule, index) => {
-            const typeText = rule.type === 'starts' ? 'Başlangıç' : (rule.type === 'includes' ? 'İçerir' : 'Bitiş');
+            const condText = rule.condition === 'starts' ? 'Başlangıç' : (rule.condition === 'includes' ? 'İçerir' : 'Bitiş');
+            const actionBadge = rule.action === 'assign' 
+                ? '<span class="rule-action-badge badge-assign">İsim Ata</span>' 
+                : '<span class="rule-action-badge badge-replace">Değiştir</span>';
+            
             const li = document.createElement('li');
-            li.innerHTML = `<div class="rule-desc"><span class="rule-tag">${typeText}: "${rule.value}"</span><strong style="margin-top:2px;">➝ ${rule.modelName}</strong></div><button onclick="deleteRule(${index})" class="btn-rule-del">Sil</button>`;
+            li.innerHTML = `
+                <div class="rule-desc">
+                    <span class="rule-tag">${condText}: "${rule.value}"</span>
+                    <div style="margin-top:4px;">${actionBadge} <strong>➝ ${rule.result}</strong></div>
+                </div>
+                <button onclick="deleteRule(${index})" class="btn-rule-del">Sil</button>
+            `;
             list.appendChild(li);
         });
     }
