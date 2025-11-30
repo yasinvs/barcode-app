@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Barkod Master v13 (Google Drive)</title>
+    <title>Barkod Master v14 (Secure)</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
@@ -12,7 +12,7 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <style>
-        /* CSS STİLLERİ */
+        /* CSS AYNI - Değişiklik Yok */
         :root { --bg-color: #f0f2f5; --card-bg: #ffffff; --text-color: #333333; --border-color: #eeeeee; --item-bg-odd: #fafafa; --highlight: #007bff; }
         [data-theme="dark"] { --bg-color: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --border-color: #333333; --item-bg-odd: #252525; --highlight: #4dabf7; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; background: var(--bg-color); color: var(--text-color); transition: 0.3s; user-select: none; }
@@ -21,7 +21,7 @@
         h2 { margin: 0; font-size: 1.4em; }
         .theme-toggle { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 5px 10px; border-radius: 20px; cursor: pointer; }
         .controls { margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
-        select, input { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
+        select, input[type="text"], input[type="number"], input[type="password"], input[type="url"] { padding: 10px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; }
         .row { display: flex; gap: 10px; margin-bottom: 10px; }
         .checkbox-container { display: flex; align-items: center; margin-bottom: 10px; padding: 10px; background: var(--item-bg-odd); border-radius: 8px; border: 1px solid var(--border-color); }
         .checkbox-container input { width: 20px; height: 20px; margin-right: 10px; cursor: pointer; }
@@ -35,12 +35,9 @@
         button.backup { background: #6c757d; }
         button.restore { background: #6610f2; }
         button.btn-manual { background: #6610f2; flex: 0.4; }
-        
         button.icon-btn { background: none; border: 1px solid var(--text-color); color: var(--text-color); flex: 0.2; font-size: 1.2em; padding: 0; }
         button.gist-btn { background: #333; color: white; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        
-        /* Google Drive Butonları */
-        button.drive-btn { background: #198754; color: white; display: flex; align-items: center; justify-content: center; gap: 5px; } /* Yeşil */
+        button.drive-btn { background: #198754; color: white; display: flex; align-items: center; justify-content: center; gap: 5px; }
         
         #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; background: black; }
         #searchInput { padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; margin-top: 15px; }
@@ -100,9 +97,12 @@
 
 <div id="driveModal" class="modal">
     <div class="modal-content">
-        <h3>Google Apps Script URL</h3>
-        <p style="font-size:0.8em; opacity:0.8;">Google Sheet'e kurduğunuz scriptin Web App URL'ini girin.</p>
+        <h3>Google Entegrasyon</h3>
+        <p style="font-size:0.8em; opacity:0.8;">Web App URL'i ve belirlediğiniz şifreyi girin.</p>
+        
         <input type="url" id="driveUrlInput" placeholder="https://script.google.com/macros/s/...">
+        <input type="password" id="driveSecretInput" placeholder="Script Şifreniz (Secret Key)">
+        
         <button class="save-modal" onclick="saveDriveSettings()">Kaydet</button>
         <button class="close-modal" onclick="closeModal('driveModal')">İptal</button>
     </div>
@@ -110,7 +110,7 @@
 
 <div class="container">
     <div class="header">
-        <h2>📦 Barkod Master <small>v13</small></h2>
+        <h2>📦 Barkod Master <small>v14</small></h2>
         <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
     </div>
 
@@ -183,6 +183,7 @@
     let gistToken = localStorage.getItem('gistToken') || '';
     let gistId = localStorage.getItem('gistId') || '';
     let driveUrl = localStorage.getItem('driveUrl') || '';
+    let driveSecret = localStorage.getItem('driveSecret') || ''; // Şifre Hafızadan
 
     let currentFolder = folders[0];
     let scanCooldown = false;
@@ -204,6 +205,7 @@
         document.getElementById('gistIdInput').value = gistId;
         document.getElementById('gistTokenInput').value = gistToken;
         document.getElementById('driveUrlInput').value = driveUrl;
+        document.getElementById('driveSecretInput').value = driveSecret; // Ayarlar penceresine şifreyi yükle
     }
 
     const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
@@ -257,50 +259,46 @@
         if (newName !== null) { productNames[code] = newName.trim(); saveData(); loadScans(); }
     }
 
-    // --- GOOGLE DRIVE & SHEETS ---
+    // --- GOOGLE DRIVE AYARLARI (GÜNCELLENDİ) ---
     function showDriveModal() { document.getElementById('driveModal').style.display = "flex"; }
     function saveDriveSettings() {
         driveUrl = document.getElementById('driveUrlInput').value.trim();
+        driveSecret = document.getElementById('driveSecretInput').value.trim(); // Şifreyi al
+        
+        if(!driveUrl || !driveSecret) { alert("Lütfen URL ve Şifreyi girin!"); return; }
+
         localStorage.setItem('driveUrl', driveUrl);
-        showToast("Drive URL Kaydedildi", "success"); closeModal('driveModal');
+        localStorage.setItem('driveSecret', driveSecret); // Hafızaya yaz
+        showToast("Ayarlar Kaydedildi", "success"); closeModal('driveModal');
     }
 
     async function sendToGoogle(operation) {
-        if (!driveUrl) { alert("Önce Drive URL giriniz!"); showDriveModal(); return; }
+        if (!driveUrl || !driveSecret) { alert("Önce Ayarlardan (⚙️) URL ve Şifre girin!"); showDriveModal(); return; }
 
         showToast("Google'a gönderiliyor...", "update");
 
-        // CSV İçeriği (Rapor için)
         let csvContent = "Barkod;Urun_Adi;Adet;Tarih;Klasör\n";
         scans.forEach(r => {
              const name = (productNames[r.code] || "").replace(/;/g, " ");
              csvContent += `${r.code};${name};${r.qty||1};${r.time};${r.folder}\n`;
         });
-
-        // JSON Yedek (Backup için)
         const jsonContent = JSON.stringify({ folders, scans, productNames }, null, 2);
 
         const payload = {
-            operation: operation, // 'report' veya 'backup'
+            secret: driveSecret, // <-- HAFIZADAKİ ŞİFRE BURAYA OTOMATİK GELİYOR
+            operation: operation,
             csvContent: csvContent,
             jsonContent: jsonContent
         };
 
         try {
-            // Google Apps Script 'no-cors' modunda çalışır, cevabı okuyamayabiliriz ama işlem gerçekleşir.
-            // Bu yüzden fetch'i 'no-cors' ile değil, doğrudan 'POST' ile deniyoruz.
-            // Google Apps Script "redirect" döner, bu yüzden 'follow' ekliyoruz.
-            
             await fetch(driveUrl, {
                 method: "POST",
-                mode: "no-cors", // Tarayıcı güvenliği için gerekli
+                mode: "no-cors",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
-
-            // no-cors modunda hata yakalanamaz ama işlem genelde başarılıdır.
-            showToast("✅ Gönderildi! (Drive/Sheet kontrol edin)", "success");
-
+            showToast("✅ Gönderildi!", "success");
         } catch (error) {
             alert("Hata: " + error.message);
         }
@@ -363,7 +361,7 @@
         } catch (error) { alert("Hata: " + error.message); }
     }
 
-    // --- STANDART FONKSİYONLAR ---
+    // --- STANDART ---
     function cleanUpProductNames() { const activeCodes = new Set(scans.map(s => s.code)); Object.keys(productNames).forEach(code => { if (!activeCodes.has(code)) delete productNames[code]; }); }
     function showStats() {
         currentFolder = document.getElementById('folderSelect').value;
