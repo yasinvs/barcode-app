@@ -895,10 +895,10 @@
             document.getElementById('setApiUrl').value = customApiUrl; openModal('settingsModal');
         }
         function saveAllSettings() {
-            gistToken = document.getElementById('setGistToken').value.trim(); driveUrl = document.getElementById('setDriveUrl').value.trim();
-            driveSecret = document.getElementById('setDriveSecret').value.trim(); customApiUrl = document.getElementById('setApiUrl').value.trim();
             localStorage.setItem('gistToken', gistToken); localStorage.setItem('driveUrl', driveUrl);
             localStorage.setItem('driveSecret', driveSecret); localStorage.setItem('customApiUrl', customApiUrl);
+            gistToken = document.getElementById('setGistToken').value.trim(); driveUrl = document.getElementById('setDriveUrl').value.trim();
+            driveSecret = document.getElementById('setDriveSecret').value.trim(); customApiUrl = document.getElementById('setApiUrl').value.trim();
             showToast("Ayarlar Kaydedildi!", "success"); closeModal('settingsModal');
         }
         function exportConfig() {
