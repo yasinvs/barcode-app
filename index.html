@@ -735,10 +735,10 @@
             </div>
         </div>
 
-        <div class="scan-control-area">
-            <label class="switch"><input type="checkbox" id="scanToggle" checked onchange="toggleScanStatus()"><span
-                    class="slider round"></span></label>
-            <span id="scanStatusText" class="scan-status-text" style="color:#28a745;">TARAMA AKTİF</span>
+        <div class="scan-control-area" style="justify-content: center; background: transparent; border: none;">
+            <button onclick="startNativeCamera()" style="background: #28a745; font-size: 1.2em; padding: 15px; width: 100%; border-radius: 8px;">
+                📸 BARKOD TARA
+            </button>
         </div>
 
         <div id="reader"></div>
@@ -1055,33 +1055,21 @@
 
         // --- ANDROID NATIVE ENTEGRASYONU ---
 
-        // Slider'ı değiştirdiğimiz fonksiyonu güncelle:
-        function toggleScanStatus() {
-            // Eğer Android içindeysek
+        // --- YENİ KAMERA FONKSİYONU ---
+        function startNativeCamera() {
+            // Android içindeysek native kamerayı aç
             if (typeof AndroidInterface !== 'undefined') {
-                // Native kamerayı aç (Android tarafını tetikler)
                 AndroidInterface.startNativeScanner();
-
-                // Slider'ı görsel olarak kapalı tutabiliriz veya açık bırakabiliriz
-                // Amaç, HTML kamerasını değil Android kamerasını kullanmak.
-                document.getElementById('scanToggle').checked = false; // HTML kamerasını kapat
-                isScanningEnabled = false;
             } else {
-                // Normal Chrome'dayız, eski usül devam
-                isScanningEnabled = document.getElementById('scanToggle').checked;
-                const statusText = document.getElementById('scanStatusText');
-                if (isScanningEnabled) { statusText.innerText = "TARAMA AKTİF"; statusText.style.color = "#28a745"; }
-                else { statusText.innerText = "TARAMA DURAKLATILDI"; statusText.style.color = "#dc3545"; }
+                // Web tarayıcısındaysak eski HTML5 kamerayı kullan (Test için)
+                alert("Bu özellik sadece Android uygulamasında çalışır!");
             }
         }
-
-        // Android barkodu okuyunca bu fonksiyonu çağıracak
+        
+        // Android taramayı bitirince burayı çağıracak
         function onNativeBarcodeScanned(code) {
-            // Bizim meşhur işlem fonksiyonumuza gönderiyoruz
-            processCode(code, 1);
-
-            // Kullanıcıya bilgi ver
-            showToast("Android Okudu: " + code, "success");
+            processCode(code, 1); // Barkodu işle
+            showToast("Okundu: " + code, "success");
         }
     </script>
 </body>
