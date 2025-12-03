@@ -14,121 +14,580 @@
 
     <style>
         /* --- TEMEL --- */
-        :root { --bg-color: #f0f2f5; --card-bg: #ffffff; --text-color: #333333; --border-color: #eeeeee; --item-bg-odd: #fafafa; --highlight: #007bff; --label-color: #666; }
-        [data-theme="dark"] { --bg-color: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0; --border-color: #333333; --item-bg-odd: #252525; --highlight: #4dabf7; --label-color: #aaa; }
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #eeeeee;
+            --item-bg-odd: #fafafa;
+            --highlight: #007bff;
+            --label-color: #666;
+        }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; background: var(--bg-color); color: var(--text-color); transition: 0.3s; user-select: none; }
-        .container { max-width: 600px; margin: 0 auto; background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #333333;
+            --item-bg-odd: #252525;
+            --highlight: #4dabf7;
+            --label-color: #aaa;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 15px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: 0.3s;
+            user-select: none;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
 
         /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        h2 { margin: 0; font-size: 1.4em; }
-        .header-buttons { display: flex; gap: 8px; }
-        .icon-btn-header { background: none; border: 1px solid var(--border-color); color: var(--text-color); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 1.2em; transition: 0.2s; }
-        .icon-btn-header:active { background: var(--border-color); }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 1.4em;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn-header {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: 0.2s;
+        }
+
+        .icon-btn-header:active {
+            background: var(--border-color);
+        }
 
         /* KAMERA (STANDART BOYUT) */
-        #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; background: black; border: 1px solid #ccc; min-height: 250px; }
+        #reader {
+            width: 100%;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: black;
+            border: 1px solid #ccc;
+            min-height: 250px;
+        }
 
         /* SCAN SWITCH */
-        .scan-control-area { display: flex; justify-content: space-between; align-items: center; background: var(--item-bg-odd); padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-color); }
-        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked+.slider { background-color: #28a745; }
-        input:checked+.slider:before { transform: translateX(24px); }
-        .scan-status-text { font-weight: bold; font-size: 0.9em; }
+        .scan-control-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--item-bg-odd);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #28a745;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(24px);
+        }
+
+        .scan-status-text {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
 
         /* FORMLAR */
-        .controls { margin-bottom: 15px; }
-        select, input { padding: 12px; width: 100%; margin-bottom: 10px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        .row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .checkbox-container { display: flex; align-items: center; margin-bottom: 10px; padding: 10px; background: var(--item-bg-odd); border-radius: 8px; border: 1px solid var(--border-color); }
-        .checkbox-container input { width: 20px; height: 20px; margin-right: 10px; }
-        .checkbox-container label { font-weight: bold; flex: 1; cursor: pointer; }
+        .controls {
+            margin-bottom: 15px;
+        }
+
+        select,
+        input {
+            padding: 12px;
+            width: 100%;
+            margin-bottom: 10px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: var(--item-bg-odd);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .checkbox-container input {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+
+        .checkbox-container label {
+            font-weight: bold;
+            flex: 1;
+            cursor: pointer;
+        }
 
         /* BUTONLAR */
-        button { padding: 12px; background: var(--highlight); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 1; font-size: 14px; transition: opacity 0.2s; }
-        button:active { transform: scale(0.98); opacity: 0.9; }
-        button.delete-folder { background: #dc3545; flex: 0.4; }
-        button.clear-list { background: #ffc107; color: black; flex: 0.4; }
-        button.btn-manual { background: #6610f2; flex: 0.4; }
+        button {
+            padding: 12px;
+            background: var(--highlight);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            flex: 1;
+            font-size: 14px;
+            transition: opacity 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        button.delete-folder {
+            background: #dc3545;
+            flex: 0.4;
+        }
+
+        button.clear-list {
+            background: #ffc107;
+            color: black;
+            flex: 0.4;
+        }
+
+        button.btn-manual {
+            background: #6610f2;
+            flex: 0.4;
+        }
 
         /* MENÜ BUTONLARI */
-        .main-menu-btn { padding: 15px; font-size: 1.1em; margin-bottom: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-backup-menu { background: #0d6efd; }
-        .btn-report-menu { background: #198754; }
+        .main-menu-btn {
+            padding: 15px;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-backup-menu {
+            background: #0d6efd;
+        }
+
+        .btn-report-menu {
+            background: #198754;
+        }
 
         /* LİSTE (Yatay Scroll Güncellemesi) */
-        #scan-list { list-style: none; padding: 0; max-height: 400px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; }
-        #scan-list li { padding: 10px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        #scan-list li:last-child { border-bottom: none; }
-        
-        /* item-left: Artık yatay kaydırılabilir */
-        .item-left { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            flex: 1; 
-            overflow-x: auto; /* Yatay kaydırma açıldı */
-            white-space: nowrap; /* Alt satıra geçmeyi engelle */
-            padding-bottom: 5px; /* Scrollbar için biraz boşluk */
-            margin-right: 10px; /* Butonlara yapışmasın */
+        #scan-list {
+            list-style: none;
+            padding: 0;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
         }
-        
-        /* Kaydırma çubuğunu güzelleştir (İnce ve şık) */
-        .item-left::-webkit-scrollbar { height: 4px; }
-        .item-left::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
-        .item-left::-webkit-scrollbar-track { background: transparent; }
 
-        .qty-badge { background: var(--highlight); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.9em; font-weight: bold; min-width: 25px; text-align: center; }
-        
+        #scan-list li {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #scan-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* item-left: Artık yatay kaydırılabilir */
+        .item-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            overflow-x: auto;
+            /* Yatay kaydırma açıldı */
+            white-space: nowrap;
+            /* Alt satıra geçmeyi engelle */
+            padding-bottom: 5px;
+            /* Scrollbar için biraz boşluk */
+            margin-right: 10px;
+            /* Butonlara yapışmasın */
+        }
+
+        /* Kaydırma çubuğunu güzelleştir (İnce ve şık) */
+        .item-left::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .item-left::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .item-left::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .qty-badge {
+            background: var(--highlight);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: bold;
+            min-width: 25px;
+            text-align: center;
+        }
+
         /* item-info: Kesilmeyi iptal ettik */
-        .item-info { display: flex; flex-direction: column; } 
-        
-        .code-text { font-weight: bold; color: var(--highlight); font-size: 1.1em; }
-        .name-text { font-size: 0.95em; opacity: 0.9; } /* text-overflow sildik */
-        .timestamp { font-size: 0.75em; opacity: 0.6; }
-        
-        .btn-controls { display: flex; gap: 5px; flex-shrink: 0; /* Butonlar küçülmesin */ }
-        .btn-small { padding: 5px 10px; font-size: 14px; border-radius: 4px; }
-        .btn-edit { background: #6f42c1; }
-        .btn-plus { background: var(--highlight); }
-        .btn-minus { background: #ffc107; color: black; }
-        .btn-del { background: #dc3545; }
+        .item-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .code-text {
+            font-weight: bold;
+            color: var(--highlight);
+            font-size: 1.1em;
+        }
+
+        .name-text {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        /* text-overflow sildik */
+        .timestamp {
+            font-size: 0.75em;
+            opacity: 0.6;
+        }
+
+        .btn-controls {
+            display: flex;
+            gap: 5px;
+            flex-shrink: 0;
+            /* Butonlar küçülmesin */
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+
+        .btn-edit {
+            background: #6f42c1;
+        }
+
+        .btn-plus {
+            background: var(--highlight);
+        }
+
+        .btn-minus {
+            background: #ffc107;
+            color: black;
+        }
+
+        .btn-del {
+            background: #dc3545;
+        }
 
         /* MODAL GENEL */
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center; overflow-y: auto; }
-        .modal-content { background-color: var(--card-bg); padding: 20px; border-radius: 10px; width: 90%; max-width: 450px; color: var(--text-color); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); max-height: 90vh; overflow-y: auto; position: relative; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .full-width { grid-column: span 2; }
-        .menu-btn { padding: 15px; font-size: 0.95em; display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; color: white; border-radius: 8px; border: none; }
-        .close-modal { margin-top: 10px; background: #dc3545; width: 100%; }
-        .save-modal { margin-top: 10px; background: #28a745; width: 100%; padding: 12px; font-size: 1.1em; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 450px;
+            color: var(--text-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .menu-btn {
+            padding: 15px;
+            font-size: 0.95em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            text-align: center;
+            color: white;
+            border-radius: 8px;
+            border: none;
+        }
+
+        .close-modal {
+            margin-top: 10px;
+            background: #dc3545;
+            width: 100%;
+        }
+
+        .save-modal {
+            margin-top: 10px;
+            background: #28a745;
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+        }
 
         /* AYARLAR & FORM DÜZENLEMELERİ (YENİLENMİŞ) */
-        .settings-group { margin-bottom: 20px; padding: 12px; background: var(--item-bg-odd); border-radius: 8px; border: 1px solid var(--border-color); }
-        .settings-group h4 { margin: 0 0 10px 0; font-size: 1.1em; color: var(--highlight); display: flex; align-items: center; gap: 5px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
-        .settings-label { display: block; font-size: 0.85em; font-weight: bold; margin-bottom: 5px; color: var(--label-color); }
-        .settings-input { margin-bottom: 12px; font-size: 0.95em; padding: 10px; width: 100%; }
-        
+        .settings-group {
+            margin-bottom: 20px;
+            padding: 12px;
+            background: var(--item-bg-odd);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .settings-group h4 {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+            color: var(--highlight);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .settings-label {
+            display: block;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--label-color);
+        }
+
+        .settings-input {
+            margin-bottom: 12px;
+            font-size: 0.95em;
+            padding: 10px;
+            width: 100%;
+        }
+
         /* TOAST */
-        #notification { visibility: hidden; min-width: 280px; background-color: #333; color: #fff; border-radius: 50px; padding: 12px 20px; position: fixed; z-index: 9999; left: 50%; top: 20px; transform: translateX(-50%); opacity: 0; transition: 0.3s; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
-        #notification.show { visibility: visible; opacity: 1; top: 50px; }
-        #notification.success { background-color: #28a745; }
-        #notification.update { background-color: #17a2b8; }
-        #notification.error { background-color: #dc3545; }
-        .toast-undo-btn { background: rgba(255, 255, 255, 0.2); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold; margin-left: 15px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-        
+        #notification {
+            visibility: hidden;
+            min-width: 280px;
+            background-color: #333;
+            color: #fff;
+            border-radius: 50px;
+            padding: 12px 20px;
+            position: fixed;
+            z-index: 9999;
+            left: 50%;
+            top: 20px;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #notification.show {
+            visibility: visible;
+            opacity: 1;
+            top: 50px;
+        }
+
+        #notification.success {
+            background-color: #28a745;
+        }
+
+        #notification.update {
+            background-color: #17a2b8;
+        }
+
+        #notification.error {
+            background-color: #dc3545;
+        }
+
+        .toast-undo-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
         /* DİĞER */
-        .stat-box { background: var(--item-bg-odd); padding: 10px; margin: 10px 0; border-radius: 8px; text-align: center; }
-        .stat-value { font-size: 1.5em; font-weight: bold; color: var(--highlight); }
-        #rulesList { list-style: none; padding: 0; margin: 0; }
-        #rulesList li { padding: 10px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--item-bg-odd); font-size: 0.9em; margin-bottom: 5px; border-radius: 6px; }
-        .rule-desc { display: flex; flex-direction: column; }
-        .rule-tag { font-size: 0.75em; font-weight: bold; background: #e9ecef; padding: 2px 5px; border-radius: 4px; width: fit-content; color: #495057; }
+        .stat-box {
+            background: var(--item-bg-odd);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--highlight);
+        }
+
+        #rulesList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #rulesList li {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--item-bg-odd);
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            border-radius: 6px;
+        }
+
+        .rule-desc {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .rule-tag {
+            font-size: 0.75em;
+            font-weight: bold;
+            background: #e9ecef;
+            padding: 2px 5px;
+            border-radius: 4px;
+            width: fit-content;
+            color: #495057;
+        }
     </style>
 </head>
 
@@ -142,25 +601,29 @@
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 style="margin:0">⚙️ Sistem Ayarları</h3><span onclick="closeModal('settingsModal')" style="cursor:pointer; font-size:1.5em;">&times;</span>
+                <h3 style="margin:0">⚙️ Sistem Ayarları</h3><span onclick="closeModal('settingsModal')"
+                    style="cursor:pointer; font-size:1.5em;">&times;</span>
             </div>
 
             <div class="settings-group">
                 <h4>☁️ GitHub Gist</h4>
                 <label class="settings-label">Personal Access Token:</label>
                 <input type="password" id="setGistToken" class="settings-input" placeholder="ghp_xxxxxxxxxxxxxxxxx">
-                
+
                 <label class="settings-label">Gist ID (Otomatik):</label>
-                <input type="text" id="setGistId" class="settings-input" placeholder="Bağlantı kurulunca dolacak" readonly style="background:#ddd; cursor:not-allowed;">
+                <input type="text" id="setGistId" class="settings-input" placeholder="Bağlantı kurulunca dolacak"
+                    readonly style="background:#ddd; cursor:not-allowed;">
             </div>
 
             <div class="settings-group">
                 <h4>📊 Google Drive & Sheets</h4>
                 <label class="settings-label">Web App URL:</label>
-                <input type="url" id="setDriveUrl" class="settings-input" placeholder="https://script.google.com/macros/s/...">
-                
+                <input type="url" id="setDriveUrl" class="settings-input"
+                    placeholder="https://script.google.com/macros/s/...">
+
                 <label class="settings-label">Secret Key (Şifre):</label>
-                <input type="password" id="setDriveSecret" class="settings-input" placeholder="Script içindeki şifreniz">
+                <input type="password" id="setDriveSecret" class="settings-input"
+                    placeholder="Script içindeki şifreniz">
             </div>
 
             <div class="settings-group">
@@ -173,7 +636,8 @@
                 <h4 style="color:#17a2b8;">🔄 Config Transferi</h4>
                 <div class="row">
                     <button onclick="exportConfig()" style="background:#6c757d;">📤 Dosyaya İndir</button>
-                    <button onclick="document.getElementById('configInput').click()" style="background:#17a2b8;">📥 Dosyadan Yükle</button>
+                    <button onclick="document.getElementById('configInput').click()" style="background:#17a2b8;">📥
+                        Dosyadan Yükle</button>
                     <input type="file" id="configInput" style="display:none" onchange="importConfig(this)">
                 </div>
             </div>
@@ -189,19 +653,75 @@
 
     <div id="rulesModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header"><h3 style="margin:0">📏 Kurallar</h3><span onclick="closeModal('rulesModal')" style="cursor:pointer; font-size:1.5em;">&times;</span></div>
+            <div class="modal-header">
+                <h3 style="margin:0">📏 Kurallar</h3><span onclick="closeModal('rulesModal')"
+                    style="cursor:pointer; font-size:1.5em;">&times;</span>
+            </div>
             <div class="settings-group">
-                <div class="row"><select id="ruleCondition" style="flex:1;"><option value="includes">İçerir</option><option value="starts">Başlangıç</option><option value="ends">Bitiş</option></select><input type="text" id="ruleValue" placeholder="Aranan" style="flex:1;"></div>
-                <div class="row"><select id="ruleAction" style="flex:1;"><option value="replace">🔀 Değiştir</option><option value="assign">🏷️ Ata</option><option value="ignore">⛔ Yok Say</option></select><input type="text" id="ruleResult" placeholder="Yeni Değer" style="flex:1;"></div>
+                <div class="row"><select id="ruleCondition" style="flex:1;">
+                        <option value="includes">İçerir</option>
+                        <option value="starts">Başlangıç</option>
+                        <option value="ends">Bitiş</option>
+                    </select><input type="text" id="ruleValue" placeholder="Aranan" style="flex:1;"></div>
+                <div class="row"><select id="ruleAction" style="flex:1;">
+                        <option value="replace">🔀 Değiştir</option>
+                        <option value="assign">🏷️ Ata</option>
+                        <option value="ignore">⛔ Yok Say</option>
+                    </select><input type="text" id="ruleResult" placeholder="Yeni Değer" style="flex:1;"></div>
                 <button onclick="addRule()" style="background:#28a745; width:100%;">+ Ekle</button>
             </div>
-            <div style="margin-top:10px;"><ul id="rulesList"></ul></div>
+            <div style="margin-top:10px;">
+                <ul id="rulesList"></ul>
+            </div>
         </div>
     </div>
 
-    <div id="backupMenuModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 style="margin:0">💾 Yedekleme</h3><span onclick="closeModal('backupMenuModal')" style="cursor:pointer;">&times;</span></div><div class="menu-grid"><button onclick="backupData()" class="menu-btn" style="background:#6c757d">📤<br>İndir</button><button onclick="document.getElementById('restoreInput').click()" class="menu-btn" style="background:#6c757d">📥<br>Yükle</button><button onclick="uploadToGist()" class="menu-btn" style="background:#333">☁️ Gist<br>Gönder</button><button onclick="downloadFromGist()" class="menu-btn" style="background:#333">☁️ Gist<br>Çek</button><button onclick="sendToGoogle('backup')" class="menu-btn full-width" style="background:#0d6efd">💾 Drive'a Yedekle</button><input type="file" id="restoreInput" style="display:none" onchange="restoreData(this)"></div></div></div>
-    <div id="reportMenuModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 style="margin:0">📊 Raporlama</h3><span onclick="closeModal('reportMenuModal')" style="cursor:pointer;">&times;</span></div><div class="menu-grid"><button onclick="showStats()" class="menu-btn" style="background:#17a2b8">📈<br>İstatistik</button><button onclick="exportToCSV()" class="menu-btn" style="background:#28a745">📂<br>Excel</button><button onclick="uploadReportToGist()" class="menu-btn" style="background:#fd7e14">☁️<br>Gist</button><button onclick="uploadReportToCustomApi()" class="menu-btn" style="background:#d63384">📡<br>API</button><button onclick="sendToGoogle('report')" class="menu-btn full-width" style="background:#198754">📊 Sheets'e Yaz</button></div></div></div>
-    <div id="statsDetailModal" class="modal"><div class="modal-content"><h3>📊 Analiz</h3><h4 id="modalFolderName"></h4><div class="stat-box"><div class="stat-value" id="statUnique">0</div><div class="stat-label">Çeşit</div></div><div class="stat-box"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Toplam</div></div><button class="close-modal" onclick="closeModal('statsDetailModal')">Kapat</button></div></div>
+    <div id="backupMenuModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin:0">💾 Yedekleme</h3><span onclick="closeModal('backupMenuModal')"
+                    style="cursor:pointer;">&times;</span>
+            </div>
+            <div class="menu-grid"><button onclick="backupData()" class="menu-btn"
+                    style="background:#6c757d">📤<br>İndir</button><button
+                    onclick="document.getElementById('restoreInput').click()" class="menu-btn"
+                    style="background:#6c757d">📥<br>Yükle</button><button onclick="uploadToGist()" class="menu-btn"
+                    style="background:#333">☁️ Gist<br>Gönder</button><button onclick="downloadFromGist()"
+                    class="menu-btn" style="background:#333">☁️ Gist<br>Çek</button><button
+                    onclick="sendToGoogle('backup')" class="menu-btn full-width" style="background:#0d6efd">💾 Drive'a
+                    Yedekle</button><input type="file" id="restoreInput" style="display:none"
+                    onchange="restoreData(this)"></div>
+        </div>
+    </div>
+    <div id="reportMenuModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin:0">📊 Raporlama</h3><span onclick="closeModal('reportMenuModal')"
+                    style="cursor:pointer;">&times;</span>
+            </div>
+            <div class="menu-grid"><button onclick="showStats()" class="menu-btn"
+                    style="background:#17a2b8">📈<br>İstatistik</button><button onclick="exportToCSV()" class="menu-btn"
+                    style="background:#28a745">📂<br>Excel</button><button onclick="uploadReportToGist()"
+                    class="menu-btn" style="background:#fd7e14">☁️<br>Gist</button><button
+                    onclick="uploadReportToCustomApi()" class="menu-btn"
+                    style="background:#d63384">📡<br>API</button><button onclick="sendToGoogle('report')"
+                    class="menu-btn full-width" style="background:#198754">📊 Sheets'e Yaz</button></div>
+        </div>
+    </div>
+    <div id="statsDetailModal" class="modal">
+        <div class="modal-content">
+            <h3>📊 Analiz</h3>
+            <h4 id="modalFolderName"></h4>
+            <div class="stat-box">
+                <div class="stat-value" id="statUnique">0</div>
+                <div class="stat-label">Çeşit</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">Toplam</div>
+            </div><button class="close-modal" onclick="closeModal('statsDetailModal')">Kapat</button>
+        </div>
+    </div>
 
     <div class="container">
         <div class="header">
@@ -216,7 +736,8 @@
         </div>
 
         <div class="scan-control-area">
-            <label class="switch"><input type="checkbox" id="scanToggle" checked onchange="toggleScanStatus()"><span class="slider round"></span></label>
+            <label class="switch"><input type="checkbox" id="scanToggle" checked onchange="toggleScanStatus()"><span
+                    class="slider round"></span></label>
             <span id="scanStatusText" class="scan-status-text" style="color:#28a745;">TARAMA AKTİF</span>
         </div>
 
@@ -237,8 +758,10 @@
                 <button onclick="addFolder()">+ Klasör</button>
             </div>
             <div class="row">
-                <input type="text" id="manualCodeInput" placeholder="Barkod..." style="flex: 2;" onkeypress="handleManualEnter(event)">
-                <input type="number" id="manualQtyInput" placeholder="Adet" value="1" style="flex: 0.6;" onkeypress="handleManualEnter(event)">
+                <input type="text" id="manualCodeInput" placeholder="Barkod..." style="flex: 2;"
+                    onkeypress="handleManualEnter(event)">
+                <input type="number" id="manualQtyInput" placeholder="Adet" value="1" style="flex: 0.6;"
+                    onkeypress="handleManualEnter(event)">
                 <button onclick="addManualCode()" class="btn-manual">Ekle</button>
             </div>
             <input type="text" id="searchInput" placeholder="🔍 Ara..." onkeyup="filterList()">
@@ -379,7 +902,7 @@
         function quickDelete(codeToDelete) {
             scans = scans.filter(s => !(s.folder === currentFolder && s.code === codeToDelete));
             saveData(); loadScans();
-            document.getElementById("notification").className = ""; 
+            document.getElementById("notification").className = "";
             if (navigator.vibrate) navigator.vibrate(50);
         }
 
@@ -424,17 +947,17 @@
         }
         function saveAllSettings() {
             // VERİYİ DOM'DAN AL
-            gistToken = document.getElementById('setGistToken').value.trim(); 
+            gistToken = document.getElementById('setGistToken').value.trim();
             driveUrl = document.getElementById('setDriveUrl').value.trim();
-            driveSecret = document.getElementById('setDriveSecret').value.trim(); 
+            driveSecret = document.getElementById('setDriveSecret').value.trim();
             customApiUrl = document.getElementById('setApiUrl').value.trim();
-            
+
             // SONRA KAYDET
-            localStorage.setItem('gistToken', gistToken); 
+            localStorage.setItem('gistToken', gistToken);
             localStorage.setItem('driveUrl', driveUrl);
-            localStorage.setItem('driveSecret', driveSecret); 
+            localStorage.setItem('driveSecret', driveSecret);
             localStorage.setItem('customApiUrl', customApiUrl);
-            
+
             showToast("Ayarlar Kaydedildi!", "success"); closeModal('settingsModal');
         }
         function exportConfig() {
@@ -451,13 +974,13 @@
                     if (c.gistToken) gistToken = c.gistToken; if (c.driveUrl) driveUrl = c.driveUrl;
                     if (c.driveSecret) driveSecret = c.driveSecret; if (c.customApiUrl) customApiUrl = c.customApiUrl;
                     if (c.namingRules) namingRules = c.namingRules;
-                    
+
                     // Inputları doldur
                     document.getElementById('setGistToken').value = gistToken;
                     document.getElementById('setDriveUrl').value = driveUrl;
                     document.getElementById('setDriveSecret').value = driveSecret;
                     document.getElementById('setApiUrl').value = customApiUrl;
-                    
+
                     saveAllSettings(); saveData(); renderRules(); alert("Yüklendi!");
                 } catch (err) { alert("Hata!"); }
             }; reader.readAsText(file);
@@ -482,9 +1005,9 @@
             namingRules.forEach((r, i) => {
                 const cT = r.condition === 'starts' ? 'Başlangıç' : (r.condition === 'includes' ? 'İçerir' : 'Bitiş');
                 let aB = '';
-                if(r.action === 'assign') aB = '<span class="rule-tag" style="background:#0d6efd;color:white;">Ata</span>';
-                else if(r.action === 'replace') aB = '<span class="rule-tag" style="background:#fd7e14;color:white;">Değiştir</span>';
-                else if(r.action === 'ignore') aB = '<span class="rule-tag" style="background:#dc3545;color:white;">YOK SAY</span>';
+                if (r.action === 'assign') aB = '<span class="rule-tag" style="background:#0d6efd;color:white;">Ata</span>';
+                else if (r.action === 'replace') aB = '<span class="rule-tag" style="background:#fd7e14;color:white;">Değiştir</span>';
+                else if (r.action === 'ignore') aB = '<span class="rule-tag" style="background:#dc3545;color:white;">YOK SAY</span>';
                 const arrow = r.action === 'ignore' ? '' : `<strong>➝ ${r.result}</strong>`;
                 const li = document.createElement('li'); li.innerHTML = `<div class="rule-desc"><span class="rule-tag">${cT}: "${r.value}"</span><div style="margin-top:4px;">${aB} ${arrow}</div></div><button onclick="deleteRule(${i})" class="btn-del" style="flex:none; width:auto; padding:5px 10px;">Sil</button>`; list.appendChild(li);
             });
@@ -529,6 +1052,37 @@
         window.onclick = function (event) { if (event.target.classList.contains('modal')) event.target.style.display = "none"; }
 
         init();
+
+        // --- ANDROID NATIVE ENTEGRASYONU ---
+
+        // Slider'ı değiştirdiğimiz fonksiyonu güncelle:
+        function toggleScanStatus() {
+            // Eğer Android içindeysek
+            if (typeof AndroidInterface !== 'undefined') {
+                // Native kamerayı aç (Android tarafını tetikler)
+                AndroidInterface.startNativeScanner();
+
+                // Slider'ı görsel olarak kapalı tutabiliriz veya açık bırakabiliriz
+                // Amaç, HTML kamerasını değil Android kamerasını kullanmak.
+                document.getElementById('scanToggle').checked = false; // HTML kamerasını kapat
+                isScanningEnabled = false;
+            } else {
+                // Normal Chrome'dayız, eski usül devam
+                isScanningEnabled = document.getElementById('scanToggle').checked;
+                const statusText = document.getElementById('scanStatusText');
+                if (isScanningEnabled) { statusText.innerText = "TARAMA AKTİF"; statusText.style.color = "#28a745"; }
+                else { statusText.innerText = "TARAMA DURAKLATILDI"; statusText.style.color = "#dc3545"; }
+            }
+        }
+
+        // Android barkodu okuyunca bu fonksiyonu çağıracak
+        function onNativeBarcodeScanned(code) {
+            // Bizim meşhur işlem fonksiyonumuza gönderiyoruz
+            processCode(code, 1);
+
+            // Kullanıcıya bilgi ver
+            showToast("Android Okudu: " + code, "success");
+        }
     </script>
 </body>
 
