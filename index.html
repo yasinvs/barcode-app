@@ -1051,8 +1051,6 @@
         function toggleTheme() { if (document.body.getAttribute('data-theme') === 'dark') { document.body.removeAttribute('data-theme'); localStorage.setItem('theme', 'light'); } else { document.body.setAttribute('data-theme', 'dark'); localStorage.setItem('theme', 'dark'); } }
         window.onclick = function (event) { if (event.target.classList.contains('modal')) event.target.style.display = "none"; }
 
-        init();
-
         // --- ANDROID NATIVE ENTEGRASYONU ---
 
         // --- YENİ KAMERA FONKSİYONU ---
@@ -1071,6 +1069,8 @@
             processCode(code, 1); // Barkodu işle
             showToast("Okundu: " + code, "success");
         }
+
+        init();
     </script>
 </body>
 
