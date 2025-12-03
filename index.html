@@ -1070,6 +1070,19 @@
             showToast("Okundu: " + code, "success");
         }
 
+        // --- ANDROID İÇİN GERİ ALMA FONKSİYONU ---
+        function undoLastScan() {
+            if (scans.length > 0) {
+                // Dizinin en başındaki (en son eklenen) elemanı sil
+                const removed = scans.shift();
+                saveData();
+                loadScans();
+                
+                // Kullanıcıya bilgi ver (Web tarafında da toast çıkabilir, opsiyonel)
+                // showToast("Geri Alındı: " + removed.code, "error");
+            }
+        }
+
         init();
     </script>
 </body>
