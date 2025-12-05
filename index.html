@@ -285,10 +285,10 @@
             }
         }
 
-        function onNativeBarcodeScanned(code) {
-            processCode(code, 1);
-            sendUpdateToNative(code);
-        }
+        // function onNativeBarcodeScanned(code) {
+        //     processCode(code, 1);
+        //     sendUpdateToNative(code);
+        // }
 
         function sendUpdateToNative(code) {
             if (typeof AndroidInterface !== 'undefined') {
