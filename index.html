@@ -960,10 +960,18 @@
 
             showToast("Ayarlar Kaydedildi!", "success"); closeModal('settingsModal');
         }
+        // Config İndirme için de aynısını yapabilirsin:
         function exportConfig() {
-            const blob = new Blob([JSON.stringify({ gistToken, driveUrl, driveSecret, customApiUrl, namingRules }, null, 2)], { type: "application/json" });
-            const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "barkod_config.json";
-            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            const jsonContent = JSON.stringify({ gistToken, driveUrl, driveSecret, customApiUrl, namingRules }, null, 2);
+            const fileName = "barkod_config.json";
+
+            if (typeof AndroidInterface !== 'undefined') {
+                AndroidInterface.saveFileToDevice(jsonContent, fileName, "application/json");
+            } else {
+                const blob = new Blob([jsonContent], { type: "application/json" });
+                const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = fileName;
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            }
         }
         function importConfig(input) {
             const file = input.files[0]; if (!file) return;
@@ -1041,11 +1049,43 @@
             });
         }
         function filterList() { loadScans(); }
-        function exportToCSV() { const filtered = scans.filter(s => s.folder === currentFolder); if (filtered.length === 0) { alert("Boş!"); return; } let csv = "data:text/csv;charset=utf-8,\uFEFFBarkod;Urun_Adi;Adet;Tarih;Klasör\r\n"; filtered.forEach(r => { csv += `${r.code};${(resolveProductName(r.code) || r.code).replace(/;/g, " ")};${r.qty || 1};${r.time};${r.folder}\r\n`; }); const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `Stok_${currentFolder}.csv`; document.body.appendChild(link); link.click(); document.body.removeChild(link); }
+        function exportToCSV() { 
+            const filtered = scans.filter(s => s.folder === currentFolder); 
+            if (filtered.length === 0) { alert("Boş!"); return; } 
+            
+            let csv = "Barkod;Urun_Adi;Adet;Tarih;Klasör\r\n"; // BOM'u Android tarafında ekliyoruz
+            filtered.forEach(r => { 
+                csv += `${r.code};${(resolveProductName(r.code)||r.code).replace(/;/g, " ")};${r.qty||1};${r.time};${r.folder}\r\n`; 
+            });
+
+            const fileName = `Stok_${currentFolder}.csv`;
+
+            // Android'de miyiz?
+            if (typeof AndroidInterface !== 'undefined') {
+                AndroidInterface.saveFileToDevice(csv, fileName, "text/csv");
+            } else {
+                // Tarayıcıdaysak eski usül devam
+                const link = document.createElement("a"); 
+                link.href = "data:text/csv;charset=utf-8,\uFEFF" + encodeURI(csv); 
+                link.download = fileName; 
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            }
+        }
         function saveData() { cleanUpProductNames(); localStorage.setItem('scans', JSON.stringify(scans)); localStorage.setItem('folders', JSON.stringify(folders)); localStorage.setItem('productNames', JSON.stringify(productNames)); localStorage.setItem('namingRules', JSON.stringify(namingRules)); }
         function addFolder() { const name = document.getElementById('newFolderInput').value.trim(); if (name && !folders.includes(name)) { folders.push(name); saveData(); currentFolder = name; document.getElementById('newFolderInput').value = ''; init(); } }
         function deleteFolder() { if (confirm("Silinsin mi?")) { folders = folders.filter(f => f !== document.getElementById('folderSelect').value); scans = scans.filter(s => s.folder !== currentFolder); if (folders.length === 0) folders = ['Genel']; currentFolder = folders[0]; saveData(); init(); } }
-        function backupData() { const blob = new Blob([JSON.stringify({ folders, scans, productNames, namingRules })], { type: "application/json" }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Full_Yedek.json"; document.body.appendChild(link); link.click(); document.body.removeChild(link); }
+        function backupData() { 
+            const jsonContent = JSON.stringify({ folders, scans, productNames, namingRules }, null, 2);
+            const fileName = "Full_Yedek.json";
+            
+            if (typeof AndroidInterface !== 'undefined') {
+                AndroidInterface.saveFileToDevice(jsonContent, fileName, "application/json");
+            } else {
+                const blob = new Blob([jsonContent], { type: "application/json" }); 
+                const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = fileName; 
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            }
+        }
         function restoreData(input) { const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = e => { try { const d = JSON.parse(e.target.result); folders = d.folders; scans = d.scans; productNames = d.productNames || {}; namingRules = d.namingRules || []; saveData(); init(); showToast("Yüklendi!", "success"); closeModal('backupMenuModal'); } catch (err) { alert("Hata"); } }; reader.readAsText(file); }
         function playBeep(freq) { if (audioCtx.state === 'suspended') audioCtx.resume(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); o.type = "square"; o.frequency.value = freq; g.gain.value = 0.1; o.start(); setTimeout(() => o.stop(), 150); }
         function toggleTheme() { if (document.body.getAttribute('data-theme') === 'dark') { document.body.removeAttribute('data-theme'); localStorage.setItem('theme', 'light'); } else { document.body.setAttribute('data-theme', 'dark'); localStorage.setItem('theme', 'dark'); } }
@@ -1066,8 +1106,17 @@
         
         // Android taramayı bitirince burayı çağıracak
         function onNativeBarcodeScanned(code) {
-            processCode(code, 1); // Barkodu işle
-            showToast("Okundu: " + code, "success");
+            // Barkodu işle
+            processCode(code, 1); 
+        
+            // Android UI'ını güncellemesi için veriyi geri gönder
+            sendUpdateToNative(code);
+        }
+
+        // Android'deki +/- butonları bunu çağıracak
+        function updateQtyFromNative(code, change) {
+            updateQty(code, change);
+            sendUpdateToNative(code);
         }
 
         // --- ANDROID İÇİN GERİ ALMA FONKSİYONU ---
@@ -1080,6 +1129,23 @@
                 
                 // Kullanıcıya bilgi ver (Web tarafında da toast çıkabilir, opsiyonel)
                 // showToast("Geri Alındı: " + removed.code, "error");
+            }
+        }
+
+        // Android ekranındaki kartı güncelle
+        function sendUpdateToNative(code) {
+            if (typeof AndroidInterface !== 'undefined') {
+                const currentFolder = document.getElementById('folderSelect').value;
+                const item = scans.find(s => s.folder === currentFolder && s.code === code);
+
+                if (item) {
+                    // Model ismini bul
+                    const name = resolveProductName(code) || ""; // İsim yoksa boş gönder
+                    const qty = item.qty || 1;
+
+                    // Android'e gönder
+                    AndroidInterface.updateScannerUI(name, code, qty);
+                }
             }
         }
 
