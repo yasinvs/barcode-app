@@ -802,10 +802,22 @@
                 select.appendChild(opt);
             });
             loadScans();
+
+            // EĞER ANDROID İÇİNDEYSEK HTML5 KAMERAYI ASLA BAŞLATMA!
+            if (typeof AndroidInterface !== 'undefined') {
+                document.getElementById('reader').style.display = 'none'; // Kamera alanını gizle
+                document.getElementById('scanToggle').checked = false; // Slider kapalı başlasın
+                document.getElementById('scanStatusText').innerText = "NATIVE MOD AKTİF";
+                isScanningEnabled = false; 
+            } else {
+                // Sadece Tarayıcıdaysak (PC/Chrome) başlat
+                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250, aspectRatio: 1.0, disableFlip: false }, false);
+                html5QrcodeScanner.render(onScanSuccess);
+            }
         }
 
         // --- KAMERA (STANDART) ---
-        const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250, aspectRatio: 1.0, disableFlip: false }, false);
+        let html5QrcodeScanner = null;
 
         function toggleScanStatus() {
             isScanningEnabled = document.getElementById('scanToggle').checked;
